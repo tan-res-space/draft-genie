@@ -1,0 +1,140 @@
+DRAFT GENIE SYSTEM DOCUMENTATION - TEXT CONVERSION
+=================================================
+
+This file contains the text representation of the Draft Genie system documentation,
+likely corresponding to the content shown in draft-genie-page-1.png and draft-genie-page-2.png.
+
+SYSTEM OVERVIEW
+===============
+
+Draft Genie is a Speaker-centric system that begins with Speaker onboarding, then pulls
+Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts and applies
+user-specific corrections using AI/ML techniques to produce improved final notes.
+
+HIGH-LEVEL FLOW (SPEAKER-CENTRIC)
+=================================
+
+1. Start Speaker Onboarding (SSA/BSA) → Choose Mode
+2. Get Speaker Info & Metadata (SER, WER, Buckets)
+3. Pull Speaker-specific ASR Drafts (AD) from InstaNote
+4. Fetch Historical Drafts (ASR + Final Notes) for the Speaker
+5. Create Correction Vector Entries for the Speaker
+6. Check for Duplicate Errors → Store Speaker Data in DraftGenie DB
+7. Apply User-Specific Corrections using Speaker's Correction Vectors
+8. Invoke RAG Service with Speaker Context & Historical Data
+9. Produce Draft Genie Final Note (DFN)
+10. Store DFN in DB
+11. Draft Comparison Service → Compare DFN vs InstaNote Final Notes (IFN)
+12. Evaluation Service → Generate Quality Metrics
+13. Speaker Bucket Reassignment based on Quality Metrics
+14. Business Dashboard Update
+
+SPEAKER ADDITION PROCESS
+========================
+
+Single Speaker Addition (SSA) / Bulk Speaker Addition (BSA) Flow:
+
+1. Start Speaker Addition → Choose Mode
+2. Mode Options:
+   - Single Speaker Addition (SSA) → Get Speaker Info
+   - Bulk Speaker Addition (BSA) → Loop SSA for each Speaker
+
+3. Get Speaker Info → Fetch Metadata: SER, WER, Buckets
+4. Fetch Metadata → Fetch Historical Drafts (ASR + Final Note)
+5. Fetch Historical Drafts → Create Correction Vector Entries
+6. Create Correction Vector Entries → Check for Duplicate Errors
+7. Check for Duplicate Errors → Store Speaker Data in DraftGenie DB
+8. Store Speaker Data → Speaker Successfully Added → End
+
+BUCKET ASSIGNMENT FLOW
+======================
+
+1. Speaker Info → Historical Drafts
+2. Historical Drafts → Correction Vector Creation
+3. Correction Vector Creation → Draft Genie Eval Service
+4. Draft Genie Eval Service → Compare IFN vs DFN
+5. Compare IFN vs DFN → Quality Metrics
+6. Quality Metrics → Bucket Assignment
+7. Bucket Assignment → Dashboard Update
+
+SYSTEM ARCHITECTURE COMPONENTS
+==============================
+
+EXTERNAL SOURCES & ACTORS:
+- InstaNote DB & Services (📊)
+- QA Reviewers (👥)
+- Admin & Ops (⚙️)
+
+DRAFTGENIE CORE PLATFORM:
+
+Ingestion & Onboarding (📥):
+- Background Scheduler (⏰)
+- Speaker Onboarding (SSA/BSA) (👤)
+- Duplicate Check (🔍)
+
+Processing & Intelligence (🧠):
+- Correction Vector Builder (📐)
+- GenAI Orchestrator (RAG Service) (🤖)
+- Draft Comparison (IFN vs DFN) (⚖️)
+- Quality Metrics & Scoring (📊)
+- Bucket Assignment Engine (🗂️)
+
+Data Layer (💾):
+- Speaker Registry (👥)
+- Historical Draft Store (📚)
+- Correction Vector DB (🎯)
+- DFN Store (📝)
+- Metrics & Analytics (📈)
+- Audit & Event Log (📋)
+
+Delivery & Experience (🚀):
+- Executive Dashboard & Drill-downs (📊)
+- Partner/API Gateway (Webhooks & Exports) (🔌)
+
+CROSS-CUTTING CAPABILITIES (🛡️):
+- Security & IAM (SSO, RBAC, PII) (🔐)
+- Observability (Monitoring, Alerts) (👁️)
+- Config & Feature Flags (⚡)
+
+KEY DATA FLOWS
+==============
+
+Ingestion Flows (Speaker-Centric):
+- Speaker Onboarding (SSA/BSA) → Get Speaker Info & Metadata
+- Speaker Onboarding → Pull Speaker-specific ASR Drafts (AD) from InstaNote
+- Speaker Onboarding → Fetch Historical Drafts for Speaker → Historical Draft Store
+- QA Reviewers → Speaker Notes, Review Inputs → Speaker Onboarding
+- Speaker Onboarding → Validate & Process → Duplicate Check
+- Duplicate Check → Store Speaker Data → Speaker Registry
+- Background Scheduler → Schedule Processing for Onboarded Speakers
+
+Vector Building Flows:
+- Speaker Registry → Speaker Profiles → Correction Vector Builder
+- Historical Draft Store → Historical Data → Correction Vector Builder
+- Correction Vector Builder → Generated Vectors → Correction Vector DB
+
+RAG Processing Flows:
+- Speaker Registry → Speaker Context → GenAI Orchestrator (RAG Service)
+- Correction Vector DB → Correction Vectors → GenAI Orchestrator (RAG Service)
+- Historical Draft Store → Historical Context → GenAI Orchestrator (RAG Service)
+- GenAI Orchestrator (RAG Service) → Generated Drafts → DFN Store
+
+ABBREVIATIONS & TERMINOLOGY
+===========================
+
+- AD: ASR Drafts (from InstaNote)
+- IFN: InstaNote Final Notes
+- DFN: Draft Genie Final Notes
+- SSA: Single Speaker Addition
+- BSA: Bulk Speaker Addition
+- SER: Speaker Error Rate
+- WER: Word Error Rate
+- RAG: Retrieval-Augmented Generation
+- QA: Quality Assurance
+- IAM: Identity and Access Management
+- SSO: Single Sign-On
+- RBAC: Role-Based Access Control
+- PII: Personally Identifiable Information
+
+This text representation captures the key system flows, architecture components,
+and processes that would typically be visualized in system diagrams.

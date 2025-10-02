@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>draft-genie-system-documentation.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="draft-genie-system-documentation">Draft Genie System Documentation</h1>
+<h2 id="1-system-overview">1. System Overview</h2>
+<p>Draft Genie is a Speaker-centric system that begins with Speaker onboarding, then pulls Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts and applies user-specific corrections using AI/ML techniques to produce improved final notes.</p>
+<h2 id="2-high-level-flow-speaker-centric">2. High-Level Flow (Speaker-Centric)</h2>
+<h3 id="21-process-flow-description">2.1 Process Flow Description</h3>
+<p>The Draft Genie system follows a Speaker-centric approach where all processing begins with Speaker onboarding:</p>
+<ol>
+<li><strong>Start Speaker Onboarding (SSA/BSA)</strong> → Choose Mode</li>
+<li><strong>Get Speaker Info &amp; Metadata</strong> (SER, WER, Buckets)</li>
+<li><strong>Pull Speaker-specific ASR Drafts (AD)</strong> from InstaNote</li>
+<li><strong>Fetch Historical Drafts</strong> (ASR + Final Notes) for the Speaker</li>
+<li><strong>Create Correction Vector Entries</strong> for the Speaker</li>
+<li><strong>Check for Duplicate Errors</strong> → Store Speaker Data in DraftGenie DB</li>
+<li><strong>Apply User-Specific Corrections</strong> using Speaker's Correction Vectors</li>
+<li><strong>Invoke RAG Service</strong> with Speaker Context &amp; Historical Data</li>
+<li><strong>Produce Draft Genie Final Note (DFN)</strong></li>
+<li><strong>Store DFN in DB</strong></li>
+<li><strong>Draft Comparison Service</strong> → Compare DFN vs InstaNote Final Notes (IFN)</li>
+<li><strong>Evaluation Service</strong> → Generate Quality Metrics</li>
+<li><strong>Speaker Bucket Reassignment</strong> based on Quality Metrics</li>
+<li><strong>Business Dashboard Update</strong></li>
+</ol>
+<h3 id="22-high-level-flow-diagram">2.2 High-Level Flow Diagram</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Start Speaker Onboarding] --> B[Choose Mode: SSA/BSA]
+    B --> C[Get Speaker Info & Metadata]
+    C --> D[Pull Speaker-specific ASR Drafts from InstaNote]
+    D --> E[Fetch Historical Drafts for Speaker]
+    E --> F[Create Correction Vector Entries]
+    F --> G[Check for Duplicate Errors]
+    G --> H[Store Speaker Data in DraftGenie DB]
+    H --> I[Apply Speaker-Specific Corrections]
+    I --> J[Invoke RAG Service with Speaker Context]
+    J --> K[Produce Draft Genie Final Note - DFN]
+    K --> L[Store DFN in DB]
+    L --> M[Draft Comparison Service]
+    M --> N[Compare DFN vs IFN]
+    N --> O[Evaluation Service]
+    O --> P[Generate Quality Metrics]
+    P --> Q[Speaker Bucket Reassignment]
+    Q --> R[Business Dashboard Update]
+</div></code></pre>
+<h2 id="3-speaker-addition-process">3. Speaker Addition Process</h2>
+<h3 id="31-process-description">3.1 Process Description</h3>
+<p>The Speaker Addition Process supports both Single Speaker Addition (SSA) and Bulk Speaker Addition (BSA):</p>
+<h3 id="32-speaker-addition-flow-diagram">3.2 Speaker Addition Flow Diagram</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Start Speaker Addition] --> B[Choose Mode]
+    B -->|Single Speaker Addition - SSA| C[Get Speaker Info]
+    B -->|Bulk Speaker Addition - BSA| D[Loop SSA for each Speaker]
+    
+    C --> E[Fetch OR Generate Metadata: SER, WER, Buckets]
+    E --> F[Fetch Historical Drafts - ASR + Final Note]
+    F --> G[Create Correction Vector Entries]
+    G --> H[Check for Duplicate Entries]
+    H --> I[Store Speaker Data in DraftGenie DB]
+    
+    D --> E
+    I --> J[Speaker Successfully Added]
+    J --> K[End]
+</div></code></pre>
+<h2 id="4-bucket-assignment-flow">4. Bucket Assignment Flow</h2>
+<h3 id="41-process-description">4.1 Process Description</h3>
+<p>The Bucket Assignment Flow operates in two distinct stages:</p>
+<p><strong>Stage 1 - Initial Bucket Assignment During Speaker Onboarding:</strong></p>
+<ul>
+<li>When a Speaker is first added to Draft Genie, the DraftGenie (DG) user manually assigns the Speaker to an initial bucket</li>
+<li>This initial assignment is based on:
+<ul>
+<li>Information available from InstaNote (such as SER, WER, and existing metadata)</li>
+<li>Feedback and insights provided by the DG user who is adding the Speaker</li>
+</ul>
+</li>
+</ul>
+<p><strong>Stage 2 - Dynamic Bucket Reassignment After Onboarding:</strong></p>
+<ul>
+<li>Once the Speaker is part of the Draft Genie system and has been processed</li>
+<li>The system performs DraftGenie Evaluation of the Speaker's historical drafts</li>
+<li>Based on this evaluation and quality metrics, the Speaker may be automatically moved to a different bucket</li>
+<li>This reassignment reflects the Speaker's actual performance as measured by Draft Genie's quality assessment</li>
+</ul>
+<h3 id="42-two-stage-bucket-assignment-flow-diagram">4.2 Two-Stage Bucket Assignment Flow Diagram</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    %% Stage 1 - Initial Assignment During Onboarding
+    subgraph STAGE1["🎯 Stage 1: Initial Bucket Assignment (During Onboarding)"]
+        A[Speaker Onboarding Initiated] --> B[DG User Reviews InstaNote Data]
+        B --> C[Available Metadata: SER, WER, etc.]
+        C --> D[DG User Insights & Feedback]
+        D --> E[Manual Initial Bucket Assignment]
+        E --> F[Speaker Stored with Initial Bucket]
+    end
+
+    %% Stage 2 - Dynamic Reassignment
+    subgraph STAGE2["🔄 Stage 2: Dynamic Bucket Reassignment (Post-Onboarding)"]
+        G[Speaker Processing Complete] --> H[Historical Drafts Available]
+        H --> I[DraftGenie Evaluation Service]
+        I --> J[Compare IFN vs DFN]
+        J --> K[Generate Quality Metrics]
+        K --> L{Quality Metrics vs Current Bucket}
+        L -->|Metrics Indicate Different Bucket| M[Automatic Bucket Reassignment]
+        L -->|Metrics Confirm Current Bucket| N[Maintain Current Bucket]
+        M --> O[Update Speaker Registry]
+        N --> O
+        O --> P[Dashboard Update]
+    end
+
+    %% Connection between stages
+    F -.->|Speaker enters system| G
+
+    %% Styling
+    classDef stage1 fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
+    classDef stage2 fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+    classDef decision fill:#fff3e0,stroke:#f57c00,stroke-width:2px
+
+    class A,B,C,D,E,F stage1
+    class G,H,I,J,K,M,N,O,P stage2
+    class L decision
+</div></code></pre>
+<h2 id="5-system-architecture-components">5. System Architecture Components</h2>
+<h3 id="51-external-sources--actors">5.1 External Sources &amp; Actors</h3>
+<ul>
+<li><strong>InstaNote DB &amp; Services</strong> (📊) - Source of ASR drafts and final notes</li>
+<li><strong>QA Reviewers</strong> (👥) - Quality assurance and review inputs</li>
+<li><strong>Admin &amp; Ops</strong> (⚙️) - System administration and operations</li>
+</ul>
+<h3 id="52-draftgenie-core-platform">5.2 DraftGenie Core Platform</h3>
+<h4 id="521-ingestion--onboarding-%F0%9F%93%A5">5.2.1 Ingestion &amp; Onboarding (📥)</h4>
+<ul>
+<li><strong>Background Scheduler</strong> (⏰) - Schedules processing tasks</li>
+<li><strong>Speaker Onboarding (SSA/BSA)</strong> (👤) - Manages speaker addition processes</li>
+<li><strong>Duplicate Check</strong> (🔍) - Prevents duplicate speaker entries</li>
+</ul>
+<h4 id="522-processing--intelligence-%F0%9F%A7%A0">5.2.2 Processing &amp; Intelligence (🧠)</h4>
+<ul>
+<li><strong>Correction Vector Builder</strong> (📐) - Creates speaker-specific correction patterns</li>
+<li><strong>GenAI Orchestrator (RAG Service)</strong> (🤖) - AI-powered draft generation</li>
+<li><strong>Draft Comparison (IFN vs DFN)</strong> (⚖️) - Compares draft quality</li>
+<li><strong>Quality Metrics &amp; Scoring</strong> (📊) - Evaluates draft performance</li>
+<li><strong>Bucket Assignment Engine</strong> (🗂️) - Categorizes speakers by quality</li>
+</ul>
+<h4 id="523-data-layer-%F0%9F%92%BE">5.2.3 Data Layer (💾)</h4>
+<ul>
+<li><strong>Speaker Registry</strong> (👥) - Central speaker information store</li>
+<li><strong>Historical Draft Store</strong> (📚) - Archive of past drafts and notes</li>
+<li><strong>Correction Vector DB</strong> (🎯) - Speaker-specific correction patterns</li>
+<li><strong>DFN Store</strong> (📝) - Draft Genie Final Notes repository</li>
+<li><strong>Metrics &amp; Analytics</strong> (📈) - Performance and quality data</li>
+<li><strong>Audit &amp; Event Log</strong> (📋) - System activity tracking</li>
+</ul>
+<h4 id="524-delivery--experience-%F0%9F%9A%80">5.2.4 Delivery &amp; Experience (🚀)</h4>
+<ul>
+<li><strong>Executive Dashboard &amp; Drill-downs</strong> (📊) - Business intelligence interface</li>
+<li><strong>Partner/API Gateway</strong> (🔌) - External integrations and webhooks</li>
+</ul>
+<h3 id="53-cross-cutting-capabilities-%F0%9F%9B%A1%EF%B8%8F">5.3 Cross-Cutting Capabilities (🛡️)</h3>
+<ul>
+<li><strong>Security &amp; IAM</strong> (🔐) - SSO, RBAC, PII protection</li>
+<li><strong>Observability</strong> (👁️) - Monitoring and alerting</li>
+<li><strong>Config &amp; Feature Flags</strong> (⚡) - System configuration management</li>
+</ul>
+<h2 id="6-core-service-definition">6. Core Service Definition</h2>
+<p>This section defines the minimum core microservices that align with the Speaker-centric architecture: responsibilities, scope, inputs/outputs, and relationships to architecture components.</p>
+<h3 id="61-speaker-management-service">6.1 Speaker Management Service</h3>
+<p>Primary responsibility: Own the Speaker lifecycle and registry; onboarding (SSA/BSA), validation/deduplication, and initial (manual) bucket assignment during onboarding.</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Speaker onboarding (SSA/BSA), validation, duplicate checks</li>
+<li>Manage Speaker Registry (profiles, metadata: SER, WER, buckets)</li>
+<li>Initial bucket assignment based on InstaNote info and DG user input</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: Speaker info, InstaNote metadata (SER, WER, etc.), DG user feedback</li>
+<li>Out: Speaker records in Speaker Registry; initial bucket set; “speaker onboarded” event</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Data Layer: Speaker Registry</li>
+<li>Ingestion: triggers Draft Ingestion for onboarded speakers</li>
+<li>Bucket Assignment: Stage 1 (manual during onboarding)</li>
+</ul>
+<h3 id="62-draft-ingestion-service">6.2 Draft Ingestion Service</h3>
+<p>Primary responsibility: Pull speaker-specific ASR drafts (AD) and historical drafts (ASR+IFN) from InstaNote; schedule ingestion; persist to Historical Draft Store.</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Background Scheduler–driven pulls for onboarded speakers</li>
+<li>Fetch historical drafts and link to speakers</li>
+<li>Data validation and storage in Historical Draft Store</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: Onboarded speaker IDs/events; InstaNote APIs</li>
+<li>Out: Historical drafts (ASR, IFN) in Historical Draft Store</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Data Layer: Historical Draft Store</li>
+<li>Upstream: Speaker Management (onboarding events)</li>
+<li>Downstream: Correction Vector Service (historical data)</li>
+</ul>
+<h3 id="63-correction-vector-service">6.3 Correction Vector Service</h3>
+<p>Primary responsibility: Build/maintain speaker-specific correction vectors using historical drafts and speaker context; manage Correction Vector DB.</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Analyze historical data to construct correction patterns</li>
+<li>Update/regenerate vectors as more data becomes available</li>
+<li>Serve vectors to RAG for generation-time personalization</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: Speaker Registry (profiles, buckets), Historical Draft Store (history)</li>
+<li>Out: Correction vectors per speaker in Correction Vector DB</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Data Layer: Correction Vector DB</li>
+<li>Upstream: Draft Ingestion, Speaker Management</li>
+<li>Downstream: RAG Orchestration (consumes vectors)</li>
+</ul>
+<h3 id="64-rag-orchestration-service">6.4 RAG Orchestration Service</h3>
+<p>Primary responsibility: Orchestrate GenAI draft generation (DFN) using speaker context, historical signals, and correction vectors; manage DFN Store.</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Invoke RAG with speaker context + correction vectors + history</li>
+<li>Produce DFN artifacts; persist to DFN Store</li>
+<li>Versioning/traceability of generated notes</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: Speaker context (Registry), Correction Vectors (DB), Historical context</li>
+<li>Out: DFN persisted in DFN Store; generation metadata</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Data Layer: DFN Store</li>
+<li>Upstream: Correction Vector Service, Draft Ingestion, Speaker Management</li>
+<li>Downstream: Evaluation &amp; Bucketing (consumes DFN)</li>
+</ul>
+<h3 id="65-evaluation--bucketing-service">6.5 Evaluation &amp; Bucketing Service</h3>
+<p>Primary responsibility: Compare DFN vs IFN, compute quality metrics, publish analytics, and perform Stage 2 bucket reassignment (automatic, post-onboarding).</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Draft Comparison (IFN vs DFN); Quality Metrics &amp; Scoring</li>
+<li>Automatic bucket reassignment based on measured performance</li>
+<li>Persist metrics to Metrics &amp; Analytics; update Speaker Registry bucket</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: DFN (DFN Store), IFN (from Historical Draft Store), current bucket</li>
+<li>Out: Metrics, analytics, bucket reassignment updates to Speaker Registry</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Processing: Draft Comparison, Quality Metrics &amp; Scoring, Bucket Assignment Engine</li>
+<li>Data Layer: Metrics &amp; Analytics; updates to Speaker Registry</li>
+<li>Delivery: feeds Dashboard with metrics and reassignment events</li>
+</ul>
+<h3 id="66-api-gateway--dashboard-service">6.6 API Gateway &amp; Dashboard Service</h3>
+<p>Primary responsibility: Provide executive dashboard &amp; drill-downs; expose partner/webhook APIs; aggregate views over core data stores for reporting.</p>
+<p>Key functions/scope:</p>
+<ul>
+<li>Secure APIs for partners/integrations; webhooks/exports</li>
+<li>BI views: speakers, buckets, metrics, DFN summaries</li>
+<li>Cross-service aggregation and caching for UI performance</li>
+</ul>
+<p>Inputs/Outputs:</p>
+<ul>
+<li>In: Speaker Registry, Metrics &amp; Analytics, DFN summaries, reassignment events</li>
+<li>Out: UI dashboards; partner APIs; reports/exports</li>
+</ul>
+<p>Relationships:</p>
+<ul>
+<li>Delivery &amp; Experience layer</li>
+<li>Reads across Data Layer; surfaces results from Processing services</li>
+</ul>
+<h3 id="67-service-interaction-pattern-overview">6.7 Service Interaction Pattern (Overview)</h3>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant SM as Speaker Mgmt
+    participant DI as Draft Ingestion
+    participant CV as Correction Vector
+    participant RAG as RAG Orchestration
+    participant EV as Evaluation & Bucketing
+    participant UI as API Gateway & Dashboard
+
+    SM->>DI: Speaker onboarded (event)
+    DI->>CV: Historical drafts available
+    CV->>RAG: Correction vectors (by speaker)
+    RAG->>EV: DFN produced
+    EV->>SM: Bucket reassignment update (if needed)
+    EV->>UI: Metrics & evaluation results
+    SM->>UI: Speaker registry and bucket status
+</div></code></pre>
+<h2 id="7-key-data-flows">7. Key Data Flows</h2>
+<h3 id="71-ingestion-flows-speaker-centric">7.1 Ingestion Flows (Speaker-Centric)</h3>
+<ul>
+<li><strong>Speaker Onboarding (SSA/BSA)</strong> → Get Speaker Info &amp; Metadata</li>
+<li><strong>Speaker Onboarding</strong> → Pull Speaker-specific ASR Drafts (AD) from InstaNote</li>
+<li><strong>Speaker Onboarding</strong> → Fetch Historical Drafts for Speaker → Historical Draft Store</li>
+<li><strong>QA Reviewers</strong> → Speaker Notes, Review Inputs → Speaker Onboarding</li>
+<li><strong>Speaker Onboarding</strong> → Validate &amp; Process → Duplicate Check</li>
+<li><strong>Duplicate Check</strong> → Store Speaker Data → Speaker Registry</li>
+<li><strong>Background Scheduler</strong> → Schedule Processing for Onboarded Speakers</li>
+</ul>
+<h3 id="72-vector-building-flows">7.2 Vector Building Flows</h3>
+<ul>
+<li><strong>Speaker Registry</strong> → Speaker Profiles → Correction Vector Builder</li>
+<li><strong>Historical Draft Store</strong> → Historical Data → Correction Vector Builder</li>
+<li><strong>Correction Vector Builder</strong> → Generated Vectors → Correction Vector DB</li>
+</ul>
+<h3 id="73-rag-processing-flows">7.3 RAG Processing Flows</h3>
+<ul>
+<li><strong>Speaker Registry</strong> → Speaker Context → GenAI Orchestrator (RAG Service)</li>
+<li><strong>Correction Vector DB</strong> → Correction Vectors → GenAI Orchestrator (RAG Service)</li>
+<li><strong>Historical Draft Store</strong> → Historical Context → GenAI Orchestrator (RAG Service)</li>
+<li><strong>GenAI Orchestrator (RAG Service)</strong> → Generated Drafts → DFN Store</li>
+</ul>
+<h2 id="8-abbreviations--terminology">8. Abbreviations &amp; Terminology</h2>
+<h3 id="81-system-acronyms">8.1 System Acronyms</h3>
+<ul>
+<li><strong>AD</strong>: ASR Drafts (from InstaNote)</li>
+<li><strong>IFN</strong>: InstaNote Final Notes</li>
+<li><strong>DFN</strong>: Draft Genie Final Notes</li>
+<li><strong>SSA</strong>: Single Speaker Addition</li>
+<li><strong>BSA</strong>: Bulk Speaker Addition</li>
+<li><strong>SER</strong>: Speaker Error Rate</li>
+<li><strong>WER</strong>: Word Error Rate</li>
+<li><strong>RAG</strong>: Retrieval-Augmented Generation</li>
+</ul>
+<h3 id="82-technical-terms">8.2 Technical Terms</h3>
+<ul>
+<li><strong>QA</strong>: Quality Assurance</li>
+<li><strong>IAM</strong>: Identity and Access Management</li>
+<li><strong>SSO</strong>: Single Sign-On</li>
+<li><strong>RBAC</strong>: Role-Based Access Control</li>
+<li><strong>PII</strong>: Personally Identifiable Information</li>
+</ul>
+<h2 id="9-summary">9. Summary</h2>
+<p>This documentation captures the Speaker-centric architecture of the Draft Genie system, where all processes begin with Speaker onboarding and flow through to quality assessment and business intelligence. The system emphasizes personalized correction vectors and AI-powered draft improvement based on individual speaker patterns and historical performance data.</p>
+
+</body>
+</html>
