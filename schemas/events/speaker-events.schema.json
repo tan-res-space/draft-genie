@@ -1,0 +1,127 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://draft-genie.com/schemas/events/speaker-events.schema.json",
+  "title": "SpeakerEvents",
+  "description": "Schema definitions for speaker-related events",
+  "definitions": {
+    "SpeakerOnboardedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "speaker.onboarded"
+            },
+            "aggregate_type": {
+              "const": "Speaker"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "speaker_id",
+                "external_id",
+                "name",
+                "bucket"
+              ],
+              "properties": {
+                "speaker_id": {
+                  "type": "string"
+                },
+                "external_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "bucket": {
+                  "type": "string",
+                  "enum": ["EXCELLENT", "GOOD", "AVERAGE", "POOR", "NEEDS_IMPROVEMENT"]
+                },
+                "metadata": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SpeakerUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "speaker.updated"
+            },
+            "aggregate_type": {
+              "const": "Speaker"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "speaker_id",
+                "changes"
+              ],
+              "properties": {
+                "speaker_id": {
+                  "type": "string"
+                },
+                "changes": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "BucketReassignedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "speaker.bucket_reassigned"
+            },
+            "aggregate_type": {
+              "const": "Speaker"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "speaker_id",
+                "old_bucket",
+                "new_bucket",
+                "reason"
+              ],
+              "properties": {
+                "speaker_id": {
+                  "type": "string"
+                },
+                "old_bucket": {
+                  "type": "string",
+                  "enum": ["EXCELLENT", "GOOD", "AVERAGE", "POOR", "NEEDS_IMPROVEMENT"]
+                },
+                "new_bucket": {
+                  "type": "string",
+                  "enum": ["EXCELLENT", "GOOD", "AVERAGE", "POOR", "NEEDS_IMPROVEMENT"]
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+

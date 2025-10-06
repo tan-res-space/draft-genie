@@ -1,0 +1,257 @@
+version: '3.8'
+
+services:
+  # PostgreSQL - Primary relational database
+  postgres:
+    image: postgres:16-alpine
+    container_name: draft-genie-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-draftgenie}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-draftgenie123}
+      POSTGRES_DB: ${POSTGRES_DB:-draftgenie}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-draftgenie}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - draft-genie-network
+
+  # MongoDB - Document store for drafts
+  mongodb:
+    image: mongo:7
+    container_name: draft-genie-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-draftgenie}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-draftgenie123}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-draftgenie}
+    ports:
+      - '${MONGO_PORT:-27017}:27017'
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - draft-genie-network
+
+  # Qdrant - Vector database for correction vectors
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: draft-genie-qdrant
+    restart: unless-stopped
+    ports:
+      - '${QDRANT_PORT:-6333}:6333'
+      - '${QDRANT_GRPC_PORT:-6334}:6334'
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:6333/healthz']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - draft-genie-network
+
+  # Redis - Caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: draft-genie-redis
+    restart: unless-stopped
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-draftgenie123}
+    healthcheck:
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - draft-genie-network
+
+  # RabbitMQ - Message broker for event-driven architecture
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: draft-genie-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-draftgenie}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-draftgenie123}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_VHOST:-/}
+    ports:
+      - '${RABBITMQ_PORT:-5672}:5672'
+      - '${RABBITMQ_MANAGEMENT_PORT:-15672}:15672'
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', '-q', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - draft-genie-network
+
+  # Speaker Service
+  speaker-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.speaker-service
+    container_name: draft-genie-speaker-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://${POSTGRES_USER:-draftgenie}:${POSTGRES_PASSWORD:-draftgenie123}@postgres:5432/${POSTGRES_DB:-draftgenie}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ../apps/speaker-service:/app/apps/speaker-service
+      - ../libs:/app/libs
+      - /app/node_modules
+    networks:
+      - draft-genie-network
+    command: npm run dev:speaker
+
+  # Draft Service
+  draft-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.draft-service
+    container_name: draft-genie-draft-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3002
+      MONGODB_URL: mongodb://${MONGO_USER:-draftgenie}:${MONGO_PASSWORD:-draftgenie123}@mongodb:27017/${MONGO_DB:-draftgenie}?authSource=admin
+      QDRANT_URL: http://qdrant:6333
+      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '3002:3002'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ../apps/draft-service:/app/apps/draft-service
+      - ../libs:/app/libs
+      - /app/node_modules
+    networks:
+      - draft-genie-network
+    command: npm run dev:draft
+
+  # RAG Service
+  rag-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.rag-service
+    container_name: draft-genie-rag-service
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3003
+      MONGODB_URL: mongodb://${MONGO_USER:-draftgenie}:${MONGO_PASSWORD:-draftgenie123}@mongodb:27017/${MONGO_DB:-draftgenie}?authSource=admin
+      QDRANT_URL: http://qdrant:6333
+      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '3003:3003'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ../apps/rag-service:/app/apps/rag-service
+      - ../libs:/app/libs
+      - /app/node_modules
+    networks:
+      - draft-genie-network
+    command: npm run dev:rag
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api-gateway
+    container_name: draft-genie-api-gateway
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3000
+      SPEAKER_SERVICE_URL: http://speaker-service:3001
+      DRAFT_SERVICE_URL: http://draft-service:3002
+      RAG_SERVICE_URL: http://rag-service:3003
+      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '3000:3000'
+    depends_on:
+      - speaker-service
+      - draft-service
+      - rag-service
+      - redis
+    volumes:
+      - ../apps/api-gateway:/app/apps/api-gateway
+      - ../libs:/app/libs
+      - /app/node_modules
+    networks:
+      - draft-genie-network
+    command: npm run dev:gateway
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  qdrant_data:
+    driver: local
+  redis_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+
+networks:
+  draft-genie-network:
+    driver: bridge
+

@@ -1,0 +1,282 @@
+openapi: 3.0.3
+info:
+  title: Draft Genie - Speaker Service API
+  description: API for managing speakers and their quality buckets
+  version: 1.0.0
+  contact:
+    name: Draft Genie Team
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+  - url: http://localhost:3000/api/speakers
+    description: Via API Gateway
+
+tags:
+  - name: speakers
+    description: Speaker management operations
+  - name: health
+    description: Health check endpoints
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/HealthCheck'
+
+  /speakers:
+    get:
+      tags:
+        - speakers
+      summary: List all speakers
+      operationId: listSpeakers
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: './common.yaml#/components/parameters/PageParam'
+        - $ref: './common.yaml#/components/parameters/LimitParam'
+        - name: bucket
+          in: query
+          description: Filter by bucket type
+          schema:
+            $ref: './common.yaml#/components/schemas/BucketType'
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            $ref: './common.yaml#/components/schemas/SpeakerStatus'
+      responses:
+        '200':
+          description: List of speakers
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: './common.yaml#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Speaker'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '500':
+          $ref: './common.yaml#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - speakers
+      summary: Onboard a new speaker
+      operationId: onboardSpeaker
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardSpeakerRequest'
+      responses:
+        '201':
+          description: Speaker onboarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Speaker'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '500':
+          $ref: './common.yaml#/components/responses/InternalServerError'
+
+  /speakers/{speakerId}:
+    get:
+      tags:
+        - speakers
+      summary: Get speaker by ID
+      operationId: getSpeaker
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: speakerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Speaker details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Speaker'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '500':
+          $ref: './common.yaml#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - speakers
+      summary: Update speaker
+      operationId: updateSpeaker
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: speakerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSpeakerRequest'
+      responses:
+        '200':
+          description: Speaker updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Speaker'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '500':
+          $ref: './common.yaml#/components/responses/InternalServerError'
+
+  /speakers/{speakerId}/bucket:
+    put:
+      tags:
+        - speakers
+      summary: Reassign speaker bucket
+      operationId: reassignBucket
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: speakerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReassignBucketRequest'
+      responses:
+        '200':
+          description: Bucket reassigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Speaker'
+        '400':
+          $ref: './common.yaml#/components/responses/BadRequest'
+        '401':
+          $ref: './common.yaml#/components/responses/Unauthorized'
+        '404':
+          $ref: './common.yaml#/components/responses/NotFound'
+        '500':
+          $ref: './common.yaml#/components/responses/InternalServerError'
+
+components:
+  schemas:
+    Speaker:
+      type: object
+      required:
+        - id
+        - external_id
+        - name
+        - bucket
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: './common.yaml#/components/schemas/UUID'
+        external_id:
+          type: string
+          description: External system identifier
+        name:
+          type: string
+        bucket:
+          $ref: './common.yaml#/components/schemas/BucketType'
+        status:
+          $ref: './common.yaml#/components/schemas/SpeakerStatus'
+        metadata:
+          type: object
+          properties:
+            total_drafts:
+              type: integer
+            average_quality_score:
+              type: number
+            last_evaluation_date:
+              $ref: './common.yaml#/components/schemas/Timestamp'
+        created_at:
+          $ref: './common.yaml#/components/schemas/Timestamp'
+        updated_at:
+          $ref: './common.yaml#/components/schemas/Timestamp'
+
+    OnboardSpeakerRequest:
+      type: object
+      required:
+        - external_id
+        - name
+        - bucket
+      properties:
+        external_id:
+          type: string
+        name:
+          type: string
+        bucket:
+          $ref: './common.yaml#/components/schemas/BucketType'
+        metadata:
+          type: object
+
+    UpdateSpeakerRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        status:
+          $ref: './common.yaml#/components/schemas/SpeakerStatus'
+        metadata:
+          type: object
+
+    ReassignBucketRequest:
+      type: object
+      required:
+        - new_bucket
+        - reason
+      properties:
+        new_bucket:
+          $ref: './common.yaml#/components/schemas/BucketType'
+        reason:
+          type: string
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+

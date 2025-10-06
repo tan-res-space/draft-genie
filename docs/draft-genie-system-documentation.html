@@ -365,22 +365,45 @@ code {
           : 'default'
     });
   </script>
-<h1 id="draft-genie-system-documentation">Draft Genie System Documentation</h1>
+<h1 id="draftgenie-system-documentation">DraftGenie System Documentation</h1>
+<h2 id="abbreviations--terminology">Abbreviations &amp; Terminology</h2>
+<h3 id="system-acronyms">System Acronyms</h3>
+<ul>
+<li><strong>AD</strong>: ASR Drafts (from InstaNote)</li>
+<li><strong>ASR</strong>: Automatic Speech Recognition</li>
+<li><strong>BSA</strong>: Batch Speaker Addition</li>
+<li><strong>DFN</strong>: DraftGenie Final Notes</li>
+<li><strong>IFN</strong>: InstaNote Final Notes</li>
+<li><strong>LD</strong>: LLM-generated Drafts</li>
+<li><strong>QA</strong>: Quality Audit</li>
+<li><strong>RAG</strong>: Retrieval-Augmented Generation</li>
+<li><strong>SER</strong>: Sentence Edit Rate</li>
+<li><strong>SSA</strong>: Single Speaker Addition</li>
+<li><strong>WER</strong>: Word Error Rate</li>
+</ul>
+<h3 id="technical-terms">Technical Terms</h3>
+<ul>
+<li><strong>IAM</strong>: Identity and Access Management</li>
+<li><strong>LLM</strong>: Large Language Model</li>
+<li><strong>PII</strong>: Personally Identifiable Information</li>
+<li><strong>RBAC</strong>: Role-Based Access Control</li>
+<li><strong>SSO</strong>: Single Sign-On</li>
+</ul>
+<hr>
 <h2 id="1-system-overview">1. System Overview</h2>
-<p>Draft Genie is a Speaker-centric system that begins with Speaker onboarding, then pulls Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts and applies user-specific corrections using AI/ML techniques to produce improved final notes.</p>
+<p>DraftGenie is a Speaker-centric system that begins with Speaker onboarding, then pulls Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts or LLM-generated drafts and applies user-specific corrections using Retrieval Augmented Generation (RAG) techniques to produce improved final notes.</p>
 <h2 id="2-high-level-flow-speaker-centric">2. High-Level Flow (Speaker-Centric)</h2>
 <h3 id="21-process-flow-description">2.1 Process Flow Description</h3>
-<p>The Draft Genie system follows a Speaker-centric approach where all processing begins with Speaker onboarding:</p>
+<p>The DraftGenie system follows a Speaker-centric approach where all processing begins with Speaker onboarding:</p>
 <ol>
 <li><strong>Start Speaker Onboarding (SSA/BSA)</strong> → Choose Mode</li>
 <li><strong>Get Speaker Info &amp; Metadata</strong> (SER, WER, Buckets)</li>
-<li><strong>Pull Speaker-specific ASR Drafts (AD)</strong> from InstaNote</li>
-<li><strong>Fetch Historical Drafts</strong> (ASR + Final Notes) for the Speaker</li>
-<li><strong>Create Correction Vector Entries</strong> for the Speaker</li>
-<li><strong>Check for Duplicate Errors</strong> → Store Speaker Data in DraftGenie DB</li>
+<li><strong>Pull Speaker-specific Historical Drafts</strong> (ASR drafts (AD), LLM-generated drafts (LD), and Final Notes (FN)) from InstaNote</li>
+<li><strong>Create Correction Vector Entries</strong> for the Speaker by comparing the historical drafts</li>
+<li><strong>Check for Duplicate Errors</strong> → Store Speaker specific correction data in DraftGenie Vector DB</li>
 <li><strong>Apply User-Specific Corrections</strong> using Speaker's Correction Vectors</li>
 <li><strong>Invoke RAG Service</strong> with Speaker Context &amp; Historical Data</li>
-<li><strong>Produce Draft Genie Final Note (DFN)</strong></li>
+<li><strong>Produce DraftGenie Final Note (DFN)</strong></li>
 <li><strong>Store DFN in DB</strong></li>
 <li><strong>Draft Comparison Service</strong> → Compare DFN vs InstaNote Final Notes (IFN)</li>
 <li><strong>Evaluation Service</strong> → Generate Quality Metrics</li>
@@ -391,14 +414,12 @@ code {
 <pre><code class="language-mermaid"><div class="mermaid">flowchart TD
     A[Start Speaker Onboarding] --> B[Choose Mode: SSA/BSA]
     B --> C[Get Speaker Info & Metadata]
-    C --> D[Pull Speaker-specific ASR Drafts from InstaNote]
-    D --> E[Fetch Historical Drafts for Speaker]
-    E --> F[Create Correction Vector Entries]
-    F --> G[Check for Duplicate Errors]
+    C --> D[Pull Speaker-specific Historical Drafts from InstaNote]
+    D --> F[Create Correction Vector Entries]
+    F --> G[Check for Duplicate Error Entries]
     G --> H[Store Speaker Data in DraftGenie DB]
-    H --> I[Apply Speaker-Specific Corrections]
-    I --> J[Invoke RAG Service with Speaker Context]
-    J --> K[Produce Draft Genie Final Note - DFN]
+    H --> I[Apply Speaker-Specific Corrections by invoking RAG Service]
+    I --> K[Produce DraftGenie Final Note - DFN]
     K --> L[Store DFN in DB]
     L --> M[Draft Comparison Service]
     M --> N[Compare DFN vs IFN]
@@ -409,12 +430,12 @@ code {
 </div></code></pre>
 <h2 id="3-speaker-addition-process">3. Speaker Addition Process</h2>
 <h3 id="31-process-description">3.1 Process Description</h3>
-<p>The Speaker Addition Process supports both Single Speaker Addition (SSA) and Bulk Speaker Addition (BSA):</p>
+<p>The Speaker Addition Process supports both Single Speaker Addition (SSA) and Batch Speaker Addition (BSA):</p>
 <h3 id="32-speaker-addition-flow-diagram">3.2 Speaker Addition Flow Diagram</h3>
 <pre><code class="language-mermaid"><div class="mermaid">flowchart TD
     A[Start Speaker Addition] --> B[Choose Mode]
     B -->|Single Speaker Addition - SSA| C[Get Speaker Info]
-    B -->|Bulk Speaker Addition - BSA| D[Loop SSA for each Speaker]
+    B -->|Batch Speaker Addition - BSA| D[Loop SSA for each Speaker]
     
     C --> E[Fetch OR Generate Metadata: SER, WER, Buckets]
     E --> F[Fetch Historical Drafts - ASR + Final Note]
@@ -431,7 +452,7 @@ code {
 <p>The Bucket Assignment Flow operates in two distinct stages:</p>
 <p><strong>Stage 1 - Initial Bucket Assignment During Speaker Onboarding:</strong></p>
 <ul>
-<li>When a Speaker is first added to Draft Genie, the DraftGenie (DG) user manually assigns the Speaker to an initial bucket</li>
+<li>When a Speaker is first added to DraftGenie, the DraftGenie (DG) user manually assigns the Speaker to an initial bucket</li>
 <li>This initial assignment is based on:
 <ul>
 <li>Information available from InstaNote (such as SER, WER, and existing metadata)</li>
@@ -441,10 +462,10 @@ code {
 </ul>
 <p><strong>Stage 2 - Dynamic Bucket Reassignment After Onboarding:</strong></p>
 <ul>
-<li>Once the Speaker is part of the Draft Genie system and has been processed</li>
+<li>Once the Speaker is part of the DraftGenie system and has been processed</li>
 <li>The system performs DraftGenie Evaluation of the Speaker's historical drafts</li>
 <li>Based on this evaluation and quality metrics, the Speaker may be automatically moved to a different bucket</li>
-<li>This reassignment reflects the Speaker's actual performance as measured by Draft Genie's quality assessment</li>
+<li>This reassignment reflects the Speaker's actual performance as measured by DraftGenie's quality assessment</li>
 </ul>
 <h3 id="42-two-stage-bucket-assignment-flow-diagram">4.2 Two-Stage Bucket Assignment Flow Diagram</h3>
 <pre><code class="language-mermaid"><div class="mermaid">flowchart TD
@@ -487,7 +508,7 @@ code {
 <h3 id="51-external-sources--actors">5.1 External Sources &amp; Actors</h3>
 <ul>
 <li><strong>InstaNote DB &amp; Services</strong> (📊) - Source of ASR drafts and final notes</li>
-<li><strong>QA Reviewers</strong> (👥) - Quality assurance and review inputs</li>
+<li><strong>QA Reviewers</strong> (👥) - Quality Audit and review inputs</li>
 <li><strong>Admin &amp; Ops</strong> (⚙️) - System administration and operations</li>
 </ul>
 <h3 id="52-draftgenie-core-platform">5.2 DraftGenie Core Platform</h3>
@@ -510,7 +531,7 @@ code {
 <li><strong>Speaker Registry</strong> (👥) - Central speaker information store</li>
 <li><strong>Historical Draft Store</strong> (📚) - Archive of past drafts and notes</li>
 <li><strong>Correction Vector DB</strong> (🎯) - Speaker-specific correction patterns</li>
-<li><strong>DFN Store</strong> (📝) - Draft Genie Final Notes repository</li>
+<li><strong>DFN Store</strong> (📝) - DraftGenie Final Notes repository</li>
 <li><strong>Metrics &amp; Analytics</strong> (📈) - Performance and quality data</li>
 <li><strong>Audit &amp; Event Log</strong> (📋) - System activity tracking</li>
 </ul>
@@ -547,17 +568,17 @@ code {
 <li>Bucket Assignment: Stage 1 (manual during onboarding)</li>
 </ul>
 <h3 id="62-draft-ingestion-service">6.2 Draft Ingestion Service</h3>
-<p>Primary responsibility: Pull speaker-specific ASR drafts (AD) and historical drafts (ASR+IFN) from InstaNote; schedule ingestion; persist to Historical Draft Store.</p>
+<p>Primary responsibility: Pull speaker-specific ASR drafts (AD), LLM-generated drafts (LD), and historical final notes (IFN) from InstaNote; schedule ingestion; persist to Historical Draft Store.</p>
 <p>Key functions/scope:</p>
 <ul>
 <li>Background Scheduler–driven pulls for onboarded speakers</li>
-<li>Fetch historical drafts and link to speakers</li>
+<li>Fetch historical drafts (AD, LD, IFN) and link to speakers</li>
 <li>Data validation and storage in Historical Draft Store</li>
 </ul>
 <p>Inputs/Outputs:</p>
 <ul>
 <li>In: Onboarded speaker IDs/events; InstaNote APIs</li>
-<li>Out: Historical drafts (ASR, IFN) in Historical Draft Store</li>
+<li>Out: Historical drafts (AD, LD, IFN) in Historical Draft Store</li>
 </ul>
 <p>Relationships:</p>
 <ul>
@@ -661,8 +682,8 @@ code {
 <h3 id="71-ingestion-flows-speaker-centric">7.1 Ingestion Flows (Speaker-Centric)</h3>
 <ul>
 <li><strong>Speaker Onboarding (SSA/BSA)</strong> → Get Speaker Info &amp; Metadata</li>
-<li><strong>Speaker Onboarding</strong> → Pull Speaker-specific ASR Drafts (AD) from InstaNote</li>
-<li><strong>Speaker Onboarding</strong> → Fetch Historical Drafts for Speaker → Historical Draft Store</li>
+<li><strong>Speaker Onboarding</strong> → Pull Speaker-specific ASR Drafts (AD) and LLM-generated Drafts (LD) from InstaNote</li>
+<li><strong>Speaker Onboarding</strong> → Fetch Historical Drafts (AD, LD, IFN) for Speaker → Historical Draft Store</li>
 <li><strong>QA Reviewers</strong> → Speaker Notes, Review Inputs → Speaker Onboarding</li>
 <li><strong>Speaker Onboarding</strong> → Validate &amp; Process → Duplicate Check</li>
 <li><strong>Duplicate Check</strong> → Store Speaker Data → Speaker Registry</li>
@@ -681,28 +702,8 @@ code {
 <li><strong>Historical Draft Store</strong> → Historical Context → GenAI Orchestrator (RAG Service)</li>
 <li><strong>GenAI Orchestrator (RAG Service)</strong> → Generated Drafts → DFN Store</li>
 </ul>
-<h2 id="8-abbreviations--terminology">8. Abbreviations &amp; Terminology</h2>
-<h3 id="81-system-acronyms">8.1 System Acronyms</h3>
-<ul>
-<li><strong>AD</strong>: ASR Drafts (from InstaNote)</li>
-<li><strong>IFN</strong>: InstaNote Final Notes</li>
-<li><strong>DFN</strong>: Draft Genie Final Notes</li>
-<li><strong>SSA</strong>: Single Speaker Addition</li>
-<li><strong>BSA</strong>: Bulk Speaker Addition</li>
-<li><strong>SER</strong>: Speaker Error Rate</li>
-<li><strong>WER</strong>: Word Error Rate</li>
-<li><strong>RAG</strong>: Retrieval-Augmented Generation</li>
-</ul>
-<h3 id="82-technical-terms">8.2 Technical Terms</h3>
-<ul>
-<li><strong>QA</strong>: Quality Assurance</li>
-<li><strong>IAM</strong>: Identity and Access Management</li>
-<li><strong>SSO</strong>: Single Sign-On</li>
-<li><strong>RBAC</strong>: Role-Based Access Control</li>
-<li><strong>PII</strong>: Personally Identifiable Information</li>
-</ul>
-<h2 id="9-summary">9. Summary</h2>
-<p>This documentation captures the Speaker-centric architecture of the Draft Genie system, where all processes begin with Speaker onboarding and flow through to quality assessment and business intelligence. The system emphasizes personalized correction vectors and AI-powered draft improvement based on individual speaker patterns and historical performance data.</p>
+<h2 id="8-summary">8. Summary</h2>
+<p>This documentation captures the Speaker-centric architecture of the DraftGenie system, where all processes begin with Speaker onboarding and flow through to quality assessment and business intelligence. The system emphasizes personalized correction vectors and AI-powered draft improvement based on individual speaker patterns and historical performance data.</p>
 
 </body>
 </html>

@@ -1,0 +1,19 @@
+FROM node:20-alpine AS base
+
+RUN apk add --no-cache libc6-compat python3 make g++
+
+WORKDIR /app
+
+COPY package*.json ./
+COPY tsconfig.json ./
+COPY nx.json ./
+
+RUN npm ci
+
+COPY libs ./libs
+COPY apps/draft-service ./apps/draft-service
+
+EXPOSE 3002
+
+CMD ["npm", "run", "dev:draft"]
+

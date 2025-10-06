@@ -1,0 +1,135 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://draft-genie.com/schemas/events/evaluation-events.schema.json",
+  "title": "EvaluationEvents",
+  "description": "Schema definitions for evaluation-related events",
+  "definitions": {
+    "EvaluationStartedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "evaluation.started"
+            },
+            "aggregate_type": {
+              "const": "Evaluation"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "evaluation_id",
+                "speaker_id",
+                "original_draft_id",
+                "corrected_draft_id"
+              ],
+              "properties": {
+                "evaluation_id": {
+                  "type": "string"
+                },
+                "speaker_id": {
+                  "type": "string"
+                },
+                "original_draft_id": {
+                  "type": "string"
+                },
+                "corrected_draft_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvaluationCompletedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "evaluation.completed"
+            },
+            "aggregate_type": {
+              "const": "Evaluation"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "evaluation_id",
+                "metrics"
+              ],
+              "properties": {
+                "evaluation_id": {
+                  "type": "string"
+                },
+                "metrics": {
+                  "type": "object",
+                  "required": [
+                    "ser",
+                    "wer",
+                    "similarity_score"
+                  ],
+                  "properties": {
+                    "ser": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "wer": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "similarity_score": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "EvaluationFailedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "evaluation.failed"
+            },
+            "aggregate_type": {
+              "const": "Evaluation"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "evaluation_id",
+                "error"
+              ],
+              "properties": {
+                "evaluation_id": {
+                  "type": "string"
+                },
+                "error": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+

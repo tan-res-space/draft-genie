@@ -1,29 +1,52 @@
-# Draft Genie System Documentation
+# DraftGenie System Documentation
+
+## Abbreviations & Terminology
+
+### System Acronyms
+- **AD**: ASR Drafts (from InstaNote)
+- **ASR**: Automatic Speech Recognition
+- **BSA**: Batch Speaker Addition
+- **DFN**: DraftGenie Final Notes
+- **IFN**: InstaNote Final Notes
+- **LD**: LLM-generated Drafts
+- **QA**: Quality Audit
+- **RAG**: Retrieval-Augmented Generation
+- **SER**: Sentence Edit Rate
+- **SSA**: Single Speaker Addition
+- **WER**: Word Error Rate
+
+### Technical Terms
+- **IAM**: Identity and Access Management
+- **LLM**: Large Language Model
+- **PII**: Personally Identifiable Information
+- **RBAC**: Role-Based Access Control
+- **SSO**: Single Sign-On
+
+---
 
 ## 1. System Overview
 
-Draft Genie is a Speaker-centric system that begins with Speaker onboarding, then pulls Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts and applies user-specific corrections using AI/ML techniques to produce improved final notes.
+DraftGenie is a Speaker-centric system that begins with Speaker onboarding, then pulls Speaker-specific InstaNote ASR (Automatic Speech Recognition) drafts or LLM-generated drafts and applies user-specific corrections using Retrieval Augmented Generation (RAG) techniques to produce improved final notes.
 
 ## 2. High-Level Flow (Speaker-Centric)
 
 ### 2.1 Process Flow Description
 
-The Draft Genie system follows a Speaker-centric approach where all processing begins with Speaker onboarding:
+The DraftGenie system follows a Speaker-centric approach where all processing begins with Speaker onboarding:
 
 1. **Start Speaker Onboarding (SSA/BSA)** → Choose Mode
 2. **Get Speaker Info & Metadata** (SER, WER, Buckets)
-3. **Pull Speaker-specific ASR Drafts (AD)** from InstaNote
-4. **Fetch Historical Drafts** (ASR + Final Notes) for the Speaker
-5. **Create Correction Vector Entries** for the Speaker
-6. **Check for Duplicate Errors** → Store Speaker Data in DraftGenie DB
-7. **Apply User-Specific Corrections** using Speaker's Correction Vectors
-8. **Invoke RAG Service** with Speaker Context & Historical Data
-9. **Produce Draft Genie Final Note (DFN)**
-10. **Store DFN in DB**
-11. **Draft Comparison Service** → Compare DFN vs InstaNote Final Notes (IFN)
-12. **Evaluation Service** → Generate Quality Metrics
-13. **Speaker Bucket Reassignment** based on Quality Metrics
-14. **Business Dashboard Update**
+3. **Pull Speaker-specific Historical Drafts** (ASR drafts (AD), LLM-generated drafts (LD), and Final Notes (FN)) from InstaNote
+4. **Create Correction Vector Entries** for the Speaker by comparing the historical drafts
+5. **Check for Duplicate Errors** → Store Speaker specific correction data in DraftGenie Vector DB
+6. **Apply User-Specific Corrections** using Speaker's Correction Vectors
+7. **Invoke RAG Service** with Speaker Context & Historical Data
+8. **Produce DraftGenie Final Note (DFN)**
+9. **Store DFN in DB**
+10. **Draft Comparison Service** → Compare DFN vs InstaNote Final Notes (IFN)
+11. **Evaluation Service** → Generate Quality Metrics
+12. **Speaker Bucket Reassignment** based on Quality Metrics
+13. **Business Dashboard Update**
 
 ### 2.2 High-Level Flow Diagram
 
@@ -31,14 +54,12 @@ The Draft Genie system follows a Speaker-centric approach where all processing b
 flowchart TD
     A[Start Speaker Onboarding] --> B[Choose Mode: SSA/BSA]
     B --> C[Get Speaker Info & Metadata]
-    C --> D[Pull Speaker-specific ASR Drafts from InstaNote]
-    D --> E[Fetch Historical Drafts for Speaker]
-    E --> F[Create Correction Vector Entries]
-    F --> G[Check for Duplicate Errors]
+    C --> D[Pull Speaker-specific Historical Drafts from InstaNote]
+    D --> F[Create Correction Vector Entries]
+    F --> G[Check for Duplicate Error Entries]
     G --> H[Store Speaker Data in DraftGenie DB]
-    H --> I[Apply Speaker-Specific Corrections]
-    I --> J[Invoke RAG Service with Speaker Context]
-    J --> K[Produce Draft Genie Final Note - DFN]
+    H --> I[Apply Speaker-Specific Corrections by invoking RAG Service]
+    I --> K[Produce DraftGenie Final Note - DFN]
     K --> L[Store DFN in DB]
     L --> M[Draft Comparison Service]
     M --> N[Compare DFN vs IFN]
@@ -52,7 +73,7 @@ flowchart TD
 
 ### 3.1 Process Description
 
-The Speaker Addition Process supports both Single Speaker Addition (SSA) and Bulk Speaker Addition (BSA):
+The Speaker Addition Process supports both Single Speaker Addition (SSA) and Batch Speaker Addition (BSA):
 
 ### 3.2 Speaker Addition Flow Diagram
 
@@ -60,7 +81,7 @@ The Speaker Addition Process supports both Single Speaker Addition (SSA) and Bul
 flowchart TD
     A[Start Speaker Addition] --> B[Choose Mode]
     B -->|Single Speaker Addition - SSA| C[Get Speaker Info]
-    B -->|Bulk Speaker Addition - BSA| D[Loop SSA for each Speaker]
+    B -->|Batch Speaker Addition - BSA| D[Loop SSA for each Speaker]
     
     C --> E[Fetch OR Generate Metadata: SER, WER, Buckets]
     E --> F[Fetch Historical Drafts - ASR + Final Note]
@@ -80,16 +101,16 @@ flowchart TD
 The Bucket Assignment Flow operates in two distinct stages:
 
 **Stage 1 - Initial Bucket Assignment During Speaker Onboarding:**
-- When a Speaker is first added to Draft Genie, the DraftGenie (DG) user manually assigns the Speaker to an initial bucket
+- When a Speaker is first added to DraftGenie, the DraftGenie (DG) user manually assigns the Speaker to an initial bucket
 - This initial assignment is based on:
   - Information available from InstaNote (such as SER, WER, and existing metadata)
   - Feedback and insights provided by the DG user who is adding the Speaker
 
 **Stage 2 - Dynamic Bucket Reassignment After Onboarding:**
-- Once the Speaker is part of the Draft Genie system and has been processed
+- Once the Speaker is part of the DraftGenie system and has been processed
 - The system performs DraftGenie Evaluation of the Speaker's historical drafts
 - Based on this evaluation and quality metrics, the Speaker may be automatically moved to a different bucket
-- This reassignment reflects the Speaker's actual performance as measured by Draft Genie's quality assessment
+- This reassignment reflects the Speaker's actual performance as measured by DraftGenie's quality assessment
 
 ### 4.2 Two-Stage Bucket Assignment Flow Diagram
 
@@ -135,7 +156,7 @@ flowchart TD
 
 ### 5.1 External Sources & Actors
 - **InstaNote DB & Services** (📊) - Source of ASR drafts and final notes
-- **QA Reviewers** (👥) - Quality assurance and review inputs
+- **QA Reviewers** (👥) - Quality Audit and review inputs
 - **Admin & Ops** (⚙️) - System administration and operations
 
 ### 5.2 DraftGenie Core Platform
@@ -156,7 +177,7 @@ flowchart TD
 - **Speaker Registry** (👥) - Central speaker information store
 - **Historical Draft Store** (📚) - Archive of past drafts and notes
 - **Correction Vector DB** (🎯) - Speaker-specific correction patterns
-- **DFN Store** (📝) - Draft Genie Final Notes repository
+- **DFN Store** (📝) - DraftGenie Final Notes repository
 - **Metrics & Analytics** (📈) - Performance and quality data
 - **Audit & Event Log** (📋) - System activity tracking
 
@@ -191,16 +212,16 @@ Relationships:
 - Bucket Assignment: Stage 1 (manual during onboarding)
 
 ### 6.2 Draft Ingestion Service
-Primary responsibility: Pull speaker-specific ASR drafts (AD) and historical drafts (ASR+IFN) from InstaNote; schedule ingestion; persist to Historical Draft Store.
+Primary responsibility: Pull speaker-specific ASR drafts (AD), LLM-generated drafts (LD), and historical final notes (IFN) from InstaNote; schedule ingestion; persist to Historical Draft Store.
 
 Key functions/scope:
 - Background Scheduler–driven pulls for onboarded speakers
-- Fetch historical drafts and link to speakers
+- Fetch historical drafts (AD, LD, IFN) and link to speakers
 - Data validation and storage in Historical Draft Store
 
 Inputs/Outputs:
 - In: Onboarded speaker IDs/events; InstaNote APIs
-- Out: Historical drafts (ASR, IFN) in Historical Draft Store
+- Out: Historical drafts (AD, LD, IFN) in Historical Draft Store
 
 Relationships:
 - Data Layer: Historical Draft Store
@@ -298,8 +319,8 @@ sequenceDiagram
 
 ### 7.1 Ingestion Flows (Speaker-Centric)
 - **Speaker Onboarding (SSA/BSA)** → Get Speaker Info & Metadata
-- **Speaker Onboarding** → Pull Speaker-specific ASR Drafts (AD) from InstaNote
-- **Speaker Onboarding** → Fetch Historical Drafts for Speaker → Historical Draft Store
+- **Speaker Onboarding** → Pull Speaker-specific ASR Drafts (AD) and LLM-generated Drafts (LD) from InstaNote
+- **Speaker Onboarding** → Fetch Historical Drafts (AD, LD, IFN) for Speaker → Historical Draft Store
 - **QA Reviewers** → Speaker Notes, Review Inputs → Speaker Onboarding
 - **Speaker Onboarding** → Validate & Process → Duplicate Check
 - **Duplicate Check** → Store Speaker Data → Speaker Registry
@@ -316,25 +337,6 @@ sequenceDiagram
 - **Historical Draft Store** → Historical Context → GenAI Orchestrator (RAG Service)
 - **GenAI Orchestrator (RAG Service)** → Generated Drafts → DFN Store
 
-## 8. Abbreviations & Terminology
+## 8. Summary
 
-### 8.1 System Acronyms
-- **AD**: ASR Drafts (from InstaNote)
-- **IFN**: InstaNote Final Notes
-- **DFN**: Draft Genie Final Notes
-- **SSA**: Single Speaker Addition
-- **BSA**: Bulk Speaker Addition
-- **SER**: Speaker Error Rate
-- **WER**: Word Error Rate
-- **RAG**: Retrieval-Augmented Generation
-
-### 8.2 Technical Terms
-- **QA**: Quality Assurance
-- **IAM**: Identity and Access Management
-- **SSO**: Single Sign-On
-- **RBAC**: Role-Based Access Control
-- **PII**: Personally Identifiable Information
-
-## 9. Summary
-
-This documentation captures the Speaker-centric architecture of the Draft Genie system, where all processes begin with Speaker onboarding and flow through to quality assessment and business intelligence. The system emphasizes personalized correction vectors and AI-powered draft improvement based on individual speaker patterns and historical performance data.
+This documentation captures the Speaker-centric architecture of the DraftGenie system, where all processes begin with Speaker onboarding and flow through to quality assessment and business intelligence. The system emphasizes personalized correction vectors and AI-powered draft improvement based on individual speaker patterns and historical performance data.

@@ -1,0 +1,87 @@
+// Prisma schema for Speaker Service
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Speaker model
+model Speaker {
+  id         String   @id @default(uuid())
+  externalId String?  @unique @map("external_id")
+  name       String
+  email      String?
+  bucket     String   // BucketType enum
+  status     String   @default("ACTIVE") // SpeakerStatus enum
+  notes      String?  @db.Text
+  
+  // Metadata stored as JSON
+  metadata   Json     @default("{}")
+  
+  // Timestamps
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+  
+  // Relations
+  evaluations Evaluation[]
+  
+  @@index([bucket])
+  @@index([status])
+  @@index([createdAt])
+  @@map("speakers")
+}
+
+// Evaluation model
+model Evaluation {
+  id                String   @id @default(uuid())
+  speakerId         String   @map("speaker_id")
+  draftId           String   @map("draft_id")
+  referenceDraftId  String   @map("reference_draft_id")
+  status            String   @default("PENDING") // EvaluationStatus enum
+  
+  // Metrics stored as JSON
+  metrics           Json     @default("{}")
+  
+  // Comparison results stored as JSON
+  comparison        Json     @default("{}")
+  
+  recommendedBucket String?  @map("recommended_bucket")
+  notes             String?  @db.Text
+  
+  // Timestamps
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+  completedAt       DateTime? @map("completed_at")
+  
+  // Relations
+  speaker           Speaker  @relation(fields: [speakerId], references: [id], onDelete: Cascade)
+  
+  @@index([speakerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("evaluations")
+}
+
+// Audit log for tracking changes
+model AuditLog {
+  id            String   @id @default(uuid())
+  entityType    String   @map("entity_type")
+  entityId      String   @map("entity_id")
+  action        String   // CREATE, UPDATE, DELETE
+  userId        String?  @map("user_id")
+  changes       Json     @default("{}")
+  metadata      Json     @default("{}")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+

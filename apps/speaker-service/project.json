@@ -1,0 +1,89 @@
+{
+  "name": "speaker-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/speaker-service/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "target": "node",
+        "compiler": "tsc",
+        "outputPath": "dist/apps/speaker-service",
+        "main": "apps/speaker-service/src/main.ts",
+        "tsConfig": "apps/speaker-service/tsconfig.app.json",
+        "assets": ["apps/speaker-service/src/assets"],
+        "isolatedConfig": true,
+        "webpackConfig": "apps/speaker-service/webpack.config.js"
+      },
+      "configurations": {
+        "development": {},
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "options": {
+        "buildTarget": "speaker-service:build"
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "speaker-service:build:development"
+        },
+        "production": {
+          "buildTarget": "speaker-service:build:production"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/speaker-service/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/speaker-service/jest.config.ts",
+        "passWithNoTests": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "prisma:generate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma generate --schema=apps/speaker-service/prisma/schema.prisma"
+      }
+    },
+    "prisma:migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma migrate dev --schema=apps/speaker-service/prisma/schema.prisma"
+      }
+    },
+    "prisma:studio": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "prisma studio --schema=apps/speaker-service/prisma/schema.prisma"
+      }
+    },
+    "seed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "ts-node apps/speaker-service/prisma/seed.ts"
+      }
+    }
+  },
+  "tags": ["type:app", "scope:speaker"]
+}
+

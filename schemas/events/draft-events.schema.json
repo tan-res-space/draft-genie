@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://draft-genie.com/schemas/events/draft-events.schema.json",
+  "title": "DraftEvents",
+  "description": "Schema definitions for draft-related events",
+  "definitions": {
+    "DraftIngestedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "draft.ingested"
+            },
+            "aggregate_type": {
+              "const": "Draft"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "draft_id",
+                "speaker_id",
+                "draft_type",
+                "content"
+              ],
+              "properties": {
+                "draft_id": {
+                  "type": "string"
+                },
+                "speaker_id": {
+                  "type": "string"
+                },
+                "draft_type": {
+                  "type": "string",
+                  "enum": ["ORIGINAL", "CORRECTED"]
+                },
+                "content": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CorrectionVectorCreatedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "draft.correction_vector_created"
+            },
+            "aggregate_type": {
+              "const": "CorrectionVector"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "vector_id",
+                "speaker_id",
+                "original_draft_id",
+                "corrected_draft_id"
+              ],
+              "properties": {
+                "vector_id": {
+                  "type": "string"
+                },
+                "speaker_id": {
+                  "type": "string"
+                },
+                "original_draft_id": {
+                  "type": "string"
+                },
+                "corrected_draft_id": {
+                  "type": "string"
+                },
+                "embedding": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CorrectionVectorUpdatedEvent": {
+      "allOf": [
+        {
+          "$ref": "domain-event.schema.json"
+        },
+        {
+          "properties": {
+            "event_type": {
+              "const": "draft.correction_vector_updated"
+            },
+            "aggregate_type": {
+              "const": "CorrectionVector"
+            },
+            "payload": {
+              "type": "object",
+              "required": [
+                "vector_id",
+                "changes"
+              ],
+              "properties": {
+                "vector_id": {
+                  "type": "string"
+                },
+                "changes": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
