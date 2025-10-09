@@ -31,9 +31,9 @@ class Settings(BaseSettings):
     # PostgreSQL
     postgres_host: str = "localhost"
     postgres_port: int = 5432
-    postgres_user: str = "postgres"
-    postgres_password: str = "postgres"
-    postgres_db: str = "evaluation_db"
+    postgres_user: str = "draftgenie"
+    postgres_password: str = "draftgenie123"
+    postgres_db: str = "draftgenie"
     postgres_pool_size: int = 10
     postgres_max_overflow: int = 20
 
@@ -48,8 +48,8 @@ class Settings(BaseSettings):
     # RabbitMQ
     rabbitmq_host: str = "localhost"
     rabbitmq_port: int = 5672
-    rabbitmq_user: str = "guest"
-    rabbitmq_password: str = "guest"
+    rabbitmq_user: str = "draftgenie"
+    rabbitmq_password: str = "draftgenie123"
     rabbitmq_vhost: str = "/"
     rabbitmq_exchange: str = "draft_genie"
     rabbitmq_exchange_type: str = "topic"

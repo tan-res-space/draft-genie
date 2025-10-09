@@ -30,10 +30,10 @@ class Settings(BaseSettings):
 
     # MongoDB
     mongodb_uri: str = Field(
-        default="mongodb://localhost:27017", description="MongoDB URI"
+        default="mongodb://draftgenie:draftgenie123@localhost:27017/draftgenie?authSource=admin", description="MongoDB URI"
     )
     mongodb_database: str = Field(
-        default="draft_genie", description="MongoDB database name"
+        default="draftgenie", description="MongoDB database name"
     )
     mongodb_min_pool_size: int = Field(default=10, description="MongoDB min pool size")
     mongodb_max_pool_size: int = Field(default=100, description="MongoDB max pool size")
@@ -49,8 +49,8 @@ class Settings(BaseSettings):
     # RabbitMQ
     rabbitmq_host: str = Field(default="localhost", description="RabbitMQ host")
     rabbitmq_port: int = Field(default=5672, description="RabbitMQ port")
-    rabbitmq_user: str = Field(default="guest", description="RabbitMQ user")
-    rabbitmq_password: str = Field(default="guest", description="RabbitMQ password")
+    rabbitmq_user: str = Field(default="draftgenie", description="RabbitMQ user")
+    rabbitmq_password: str = Field(default="draftgenie123", description="RabbitMQ password")
     rabbitmq_vhost: str = Field(default="/", description="RabbitMQ vhost")
     rabbitmq_exchange: str = Field(
         default="draft_genie_events", description="RabbitMQ exchange"

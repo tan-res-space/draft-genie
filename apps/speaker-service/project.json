@@ -16,7 +16,8 @@
         "tsConfig": "apps/speaker-service/tsconfig.app.json",
         "assets": ["apps/speaker-service/src/assets"],
         "isolatedConfig": true,
-        "webpackConfig": "apps/speaker-service/webpack.config.js"
+        "webpackConfig": "apps/speaker-service/webpack.config.js",
+        "externalDependencies": "none"
       },
       "configurations": {
         "development": {},
@@ -86,4 +87,3 @@
   },
   "tags": ["type:app", "scope:speaker"]
 }
-

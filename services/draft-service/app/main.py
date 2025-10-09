@@ -47,8 +47,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         await event_consumer.connect()
 
         # Start consuming events
-        db = await mongodb.db
-        if db:
+        db = mongodb.db
+        if db is not None:
             draft_repository = DraftRepository(db)
             draft_service = get_draft_service(draft_repository)
             event_handler = EventHandler(draft_service)

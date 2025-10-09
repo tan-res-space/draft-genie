@@ -1,0 +1,459 @@
+openapi: 3.0.0
+info:
+  title: Draft Genie API Gateway
+  description: |
+    Unified API Gateway for Draft Genie microservices.
+    Provides authentication, routing, and data aggregation across all services.
+  version: 1.0.0
+  contact:
+    name: Draft Genie Team
+    email: support@draftgenie.com
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.draftgenie.com/api/v1
+    description: Production server
+
+tags:
+  - name: auth
+    description: Authentication and authorization
+  - name: aggregation
+    description: Cross-service data aggregation
+  - name: workflow
+    description: Multi-service workflows
+  - name: health
+    description: Health check endpoints
+
+components:
+  securitySchemes:
+    JWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /auth/login or /auth/register
+    
+    API-Key:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API Key for service-to-service communication
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [admin, user]
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+          format: uuid
+        expiresIn:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+          minLength: 2
+
+    RefreshTokenRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+          format: uuid
+
+    GenerateDfnRequest:
+      type: object
+      required:
+        - speakerId
+      properties:
+        speakerId:
+          type: string
+          format: uuid
+        prompt:
+          type: string
+        context:
+          type: object
+          additionalProperties: true
+
+    Error:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        message:
+          type: string
+        error:
+          type: string
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check for API Gateway
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  info:
+                    type: object
+                  error:
+                    type: object
+                  details:
+                    type: object
+        '503':
+          description: Service is unhealthy
+
+  /health/services:
+    get:
+      tags:
+        - health
+      summary: Health check for all backend services
+      operationId: healthCheckServices
+      responses:
+        '200':
+          description: All services are healthy
+        '503':
+          description: One or more services are unhealthy
+
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Register a new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Login with email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successfully logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token successfully refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logout and invalidate refresh token
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '204':
+          description: Successfully logged out
+
+  /auth/me:
+    get:
+      tags:
+        - auth
+      summary: Get current user profile
+      operationId: getProfile
+      security:
+        - JWT: []
+      responses:
+        '200':
+          description: User profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /speakers/{id}/complete:
+    get:
+      tags:
+        - aggregation
+      summary: Get complete speaker data
+      description: Aggregates speaker data with all associated drafts, evaluations, and metrics from multiple services
+      operationId: getSpeakerComplete
+      security:
+        - JWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Speaker ID
+      responses:
+        '200':
+          description: Complete speaker data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  speaker:
+                    type: object
+                  drafts:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      error:
+                        type: string
+                        nullable: true
+                  evaluations:
+                    type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                      error:
+                        type: string
+                        nullable: true
+                  metrics:
+                    type: object
+                    properties:
+                      data:
+                        type: object
+                      error:
+                        type: string
+                        nullable: true
+                  summary:
+                    type: object
+                    properties:
+                      totalDrafts:
+                        type: integer
+                      totalEvaluations:
+                        type: integer
+                      hasMetrics:
+                        type: boolean
+                  aggregatedAt:
+                    type: string
+                    format: date-time
+        '404':
+          description: Speaker not found
+        '401':
+          description: Unauthorized
+
+  /dashboard/metrics:
+    get:
+      tags:
+        - aggregation
+      summary: Get dashboard metrics
+      description: Aggregates metrics from all services for dashboard display
+      operationId: getDashboardMetrics
+      security:
+        - JWT: []
+      responses:
+        '200':
+          description: Dashboard metrics retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  speakers:
+                    type: object
+                  evaluations:
+                    type: object
+                  drafts:
+                    type: object
+                  summary:
+                    type: object
+                    properties:
+                      totalSpeakers:
+                        type: integer
+                      totalDrafts:
+                        type: integer
+                      totalEvaluations:
+                        type: integer
+                      servicesHealthy:
+                        type: integer
+                      servicesTotal:
+                        type: integer
+                      healthPercentage:
+                        type: integer
+                  aggregatedAt:
+                    type: string
+                    format: date-time
+        '401':
+          description: Unauthorized
+
+  /workflow/generate-dfn:
+    post:
+      tags:
+        - workflow
+      summary: Generate DFN (Draft From Notes) - Complete Workflow
+      description: |
+        Orchestrates the complete DFN generation workflow across multiple services:
+        1. Validates speaker exists
+        2. Checks for existing drafts (IFN)
+        3. Triggers RAG service with LangGraph AI agent
+        4. Returns generated DFN with metadata
+      operationId: generateDfn
+      security:
+        - JWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateDfnRequest'
+      responses:
+        '201':
+          description: DFN generation workflow completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  workflow:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum: [completed, failed]
+                      steps:
+                        type: array
+                        items:
+                          type: object
+                      completedAt:
+                        type: string
+                        format: date-time
+                  speaker:
+                    type: object
+                  generation:
+                    type: object
+                  dfn:
+                    type: object
+                  metadata:
+                    type: object
+        '400':
+          description: Bad request - Speaker has no drafts or invalid input
+        '401':
+          description: Unauthorized
+        '404':
+          description: Speaker not found
+

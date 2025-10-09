@@ -49,7 +49,7 @@ class MongoDB:
 
     async def _create_indexes(self) -> None:
         """Create database indexes"""
-        if not self.db:
+        if self.db is None:
             return
 
         try:

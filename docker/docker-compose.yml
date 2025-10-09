@@ -137,7 +137,7 @@ services:
       - draft-genie-network
     command: npm run dev:speaker
 
-  # Draft Service
+  # Draft Service (Python/FastAPI)
   draft-service:
     build:
       context: ..
@@ -145,7 +145,7 @@ services:
     container_name: draft-genie-draft-service
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       PORT: 3002
       MONGODB_URL: mongodb://${MONGO_USER:-draftgenie}:${MONGO_PASSWORD:-draftgenie123}@mongodb:27017/${MONGO_DB:-draftgenie}?authSource=admin
       QDRANT_URL: http://qdrant:6333
@@ -153,6 +153,7 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      SPEAKER_SERVICE_URL: http://speaker-service:3001
     ports:
       - '3002:3002'
     depends_on:
@@ -164,15 +165,12 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    volumes:
-      - ../apps/draft-service:/app/apps/draft-service
-      - ../libs:/app/libs
-      - /app/node_modules
+      speaker-service:
+        condition: service_started
     networks:
       - draft-genie-network
-    command: npm run dev:draft
 
-  # RAG Service
+  # RAG Service (Python/FastAPI + LangChain)
   rag-service:
     build:
       context: ..
@@ -180,7 +178,7 @@ services:
     container_name: draft-genie-rag-service
     restart: unless-stopped
     environment:
-      NODE_ENV: ${NODE_ENV:-development}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
       PORT: 3003
       MONGODB_URL: mongodb://${MONGO_USER:-draftgenie}:${MONGO_PASSWORD:-draftgenie123}@mongodb:27017/${MONGO_DB:-draftgenie}?authSource=admin
       QDRANT_URL: http://qdrant:6333
@@ -188,6 +186,8 @@ services:
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      SPEAKER_SERVICE_URL: http://speaker-service:3001
+      DRAFT_SERVICE_URL: http://draft-service:3002
     ports:
       - '3003:3003'
     depends_on:
@@ -199,15 +199,46 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    volumes:
-      - ../apps/rag-service:/app/apps/rag-service
-      - ../libs:/app/libs
-      - /app/node_modules
+      speaker-service:
+        condition: service_started
+      draft-service:
+        condition: service_started
     networks:
       - draft-genie-network
-    command: npm run dev:rag
 
-  # API Gateway
+  # Evaluation Service (Python/FastAPI)
+  evaluation-service:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.evaluation-service
+    container_name: draft-genie-evaluation-service
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      PORT: 3004
+      MONGODB_URL: mongodb://${MONGO_USER:-draftgenie}:${MONGO_PASSWORD:-draftgenie123}@mongodb:27017/${MONGO_DB:-draftgenie}?authSource=admin
+      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-draftgenie}:${RABBITMQ_PASSWORD:-draftgenie123}@rabbitmq:5672/${RABBITMQ_VHOST:-/}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      SPEAKER_SERVICE_URL: http://speaker-service:3001
+      DRAFT_SERVICE_URL: http://draft-service:3002
+    ports:
+      - '3004:3004'
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      speaker-service:
+        condition: service_started
+      draft-service:
+        condition: service_started
+    networks:
+      - draft-genie-network
+
+  # API Gateway (Node.js/NestJS)
   api-gateway:
     build:
       context: ..
@@ -220,9 +251,15 @@ services:
       SPEAKER_SERVICE_URL: http://speaker-service:3001
       DRAFT_SERVICE_URL: http://draft-service:3002
       RAG_SERVICE_URL: http://rag-service:3003
-      REDIS_URL: redis://:${REDIS_PASSWORD:-draftgenie123}@redis:6379
-      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
-      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      EVALUATION_SERVICE_URL: http://evaluation-service:3004
+      JWT_SECRET: ${JWT_SECRET:-draft-genie-secret-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      API_KEYS: ${API_KEYS:-service-key-1,service-key-2}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      THROTTLE_TTL: ${THROTTLE_TTL:-60000}
+      THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      SWAGGER_PATH: ${SWAGGER_PATH:-api/docs}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - '3000:3000'
@@ -230,9 +267,10 @@ services:
       - speaker-service
       - draft-service
       - rag-service
+      - evaluation-service
       - redis
     volumes:
-      - ../apps/api-gateway:/app/apps/api-gateway
+      - ../services/api-gateway:/app/services/api-gateway
       - ../libs:/app/libs
       - /app/node_modules
     networks:

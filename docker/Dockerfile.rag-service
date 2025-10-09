@@ -1,19 +1,53 @@
-FROM node:20-alpine AS base
+# Multi-stage build for RAG Service (Python/FastAPI + LangChain)
+FROM python:3.11-slim AS builder
 
-RUN apk add --no-cache libc6-compat python3 make g++
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    make \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==1.7.1
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY tsconfig.json ./
-COPY nx.json ./
+# Copy dependency files
+COPY services/rag-service/pyproject.toml services/rag-service/poetry.lock ./
 
-RUN npm ci
+# Install dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi --no-root --only main
 
-COPY libs ./libs
-COPY apps/rag-service ./apps/rag-service
+# Production stage
+FROM python:3.11-slim
 
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY services/rag-service/app ./app
+
+# Create non-root user
+RUN useradd -m -u 1001 fastapi && chown -R fastapi:fastapi /app
+USER fastapi
+
+# Expose port
 EXPOSE 3003
 
-CMD ["npm", "run", "dev:rag"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:3003/health || exit 1
 
+# Run application
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3003"]

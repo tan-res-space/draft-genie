@@ -1,0 +1,335 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+  PYTHON_VERSION: '3.11'
+  POETRY_VERSION: '1.7.1'
+
+jobs:
+  # Lint and format checks
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Node dependencies
+        run: npm ci
+      
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: Lint TypeScript (Node.js services)
+        run: |
+          npx nx run-many --target=lint --all --parallel=3
+      
+      - name: Lint Python (Draft Service)
+        working-directory: services/draft-service
+        run: |
+          poetry install --no-root
+          poetry run ruff check app/
+          poetry run black --check app/
+      
+      - name: Lint Python (RAG Service)
+        working-directory: services/rag-service
+        run: |
+          poetry install --no-root
+          poetry run ruff check app/
+          poetry run black --check app/
+      
+      - name: Lint Python (Evaluation Service)
+        working-directory: services/evaluation-service
+        run: |
+          poetry install --no-root
+          poetry run ruff check app/
+          poetry run black --check app/
+
+  # Unit tests for Node.js services
+  test-nodejs:
+    name: Test Node.js Services
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: draftgenie
+          POSTGRES_PASSWORD: draftgenie123
+          POSTGRES_DB: draftgenie_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run Speaker Service tests
+        run: npx nx test speaker-service --coverage
+        env:
+          DATABASE_URL: postgresql://draftgenie:draftgenie123@localhost:5432/draftgenie_test
+          REDIS_URL: redis://localhost:6379
+      
+      - name: Run API Gateway tests
+        run: npx nx test api-gateway --coverage
+        env:
+          JWT_SECRET: test-secret-key
+          REDIS_URL: redis://localhost:6379
+      
+      - name: Upload Node.js coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: nodejs
+          name: nodejs-coverage
+
+  # Unit tests for Python services
+  test-python:
+    name: Test Python Services
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: draftgenie
+          MONGO_INITDB_ROOT_PASSWORD: draftgenie123
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand(\"ping\").ok'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      
+      qdrant:
+        image: qdrant/qdrant:v1.7.4
+        ports:
+          - 6333:6333
+      
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      
+      - name: Test Draft Service
+        working-directory: services/draft-service
+        run: |
+          poetry install --no-root
+          poetry run pytest tests/ --cov=app --cov-report=xml
+        env:
+          MONGODB_URL: mongodb://draftgenie:draftgenie123@localhost:27017/draftgenie_test?authSource=admin
+          QDRANT_URL: http://localhost:6333
+          REDIS_URL: redis://localhost:6379
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      
+      - name: Test RAG Service
+        working-directory: services/rag-service
+        run: |
+          poetry install --no-root
+          poetry run pytest tests/ --cov=app --cov-report=xml
+        env:
+          MONGODB_URL: mongodb://draftgenie:draftgenie123@localhost:27017/draftgenie_test?authSource=admin
+          QDRANT_URL: http://localhost:6333
+          REDIS_URL: redis://localhost:6379
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      
+      - name: Test Evaluation Service
+        working-directory: services/evaluation-service
+        run: |
+          poetry install --no-root
+          poetry run pytest tests/ --cov=app --cov-report=xml
+        env:
+          MONGODB_URL: mongodb://draftgenie:draftgenie123@localhost:27017/draftgenie_test?authSource=admin
+          REDIS_URL: redis://localhost:6379
+      
+      - name: Upload Python coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./services/*/coverage.xml
+          flags: python
+          name: python-coverage
+
+  # Integration tests
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [test-nodejs, test-python]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      
+      - name: Install test dependencies
+        run: |
+          pip install pytest pytest-asyncio httpx python-dotenv motor psycopg2-binary redis qdrant-client aio-pika
+      
+      - name: Start services with Docker Compose
+        run: |
+          docker-compose up -d
+          sleep 30  # Wait for services to be ready
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      
+      - name: Check service health
+        run: |
+          curl -f http://localhost:3000/api/v1/health || exit 1
+          curl -f http://localhost:3001/health || exit 1
+          curl -f http://localhost:3002/health || exit 1
+          curl -f http://localhost:3003/health || exit 1
+          curl -f http://localhost:3004/health || exit 1
+      
+      - name: Run integration tests
+        run: |
+          pytest tests/integration/ -v --cov --cov-report=xml
+        env:
+          API_GATEWAY_URL: http://localhost:3000
+          SPEAKER_SERVICE_URL: http://localhost:3001
+          DRAFT_SERVICE_URL: http://localhost:3002
+          RAG_SERVICE_URL: http://localhost:3003
+          EVALUATION_SERVICE_URL: http://localhost:3004
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      
+      - name: Upload integration test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage.xml
+          flags: integration
+          name: integration-coverage
+      
+      - name: Show service logs on failure
+        if: failure()
+        run: docker-compose logs
+      
+      - name: Stop services
+        if: always()
+        run: docker-compose down -v
+
+  # Build Docker images
+  build-docker:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [lint, test-nodejs, test-python]
+    
+    strategy:
+      matrix:
+        service:
+          - speaker-service
+          - api-gateway
+          - draft-service
+          - rag-service
+          - evaluation-service
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.${{ matrix.service }}
+          push: false
+          tags: draft-genie-${{ matrix.service }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # Summary
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    needs: [lint, test-nodejs, test-python, integration-tests, build-docker, security-scan]
+    if: success()
+    
+    steps:
+      - name: CI Passed
+        run: echo "✅ All CI checks passed successfully!"
+
