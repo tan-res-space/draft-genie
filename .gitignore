@@ -219,3 +219,33 @@ docker/rabbitmq/data/
 # Local development overrides
 *.local.*
 
+# Service management
+.pids/
+.logs/
+
+
+# ============================================
+# Deployment Scripts
+# ============================================
+
+# Python virtual environment for deployment scripts
+scripts/venv/
+
+# Deployment state and logs
+.azure-deployment-state.json
+.gcp-deployment-state.json
+.zoho-deployment-state.json
+azure-deployment.log
+gcp-deployment.log
+zoho-deployment.log
+azure-deployment-summary.md
+gcp-deployment-summary.md
+zoho-deployment-summary.md
+azure-cleanup.log
+gcp-cleanup.log
+zoho-cleanup.log
+
+# Deployment configuration (may contain secrets)
+scripts/azure/config.yaml
+scripts/gcp/config.yaml
+scripts/zoho/config.yaml

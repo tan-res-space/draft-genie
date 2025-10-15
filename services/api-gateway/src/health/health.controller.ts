@@ -3,16 +3,18 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckService,
-  HttpHealthIndicator,
   HealthCheckResult,
+  HealthIndicatorResult,
 } from '@nestjs/terminus';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private http: HttpHealthIndicator,
+    private httpService: HttpService,
   ) {}
 
   @Get()
@@ -38,10 +40,31 @@ export class HealthController {
     const evaluationUrl = process.env['EVALUATION_SERVICE_URL'] ?? 'http://localhost:3004';
 
     return this.health.check([
-      () => this.http.pingCheck('speaker-service', `${speakerUrl}/health`),
-      () => this.http.pingCheck('draft-service', `${draftUrl}/health`),
-      () => this.http.pingCheck('rag-service', `${ragUrl}/health`),
-      () => this.http.pingCheck('evaluation-service', `${evaluationUrl}/health`),
+      () => this.pingCheck('speaker-service', `${speakerUrl}/health`),
+      () => this.pingCheck('draft-service', `${draftUrl}/health`),
+      () => this.pingCheck('rag-service', `${ragUrl}/health`),
+      () => this.pingCheck('evaluation-service', `${evaluationUrl}/health`),
     ]);
+  }
+
+  private async pingCheck(key: string, url: string): Promise<HealthIndicatorResult> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, { timeout: 3000 })
+      );
+      const isHealthy = response.status >= 200 && response.status < 300;
+      return {
+        [key]: {
+          status: isHealthy ? 'up' : 'down',
+        },
+      };
+    } catch (error) {
+      return {
+        [key]: {
+          status: 'down',
+          message: error.message,
+        },
+      };
+    }
   }
 }

@@ -1,0 +1,257 @@
+# DraftGenie Azure Deployment Configuration - Example
+# This is a complete example configuration with recommended values
+
+# Azure Configuration
+azure:
+  # Leave empty to use default subscription
+  subscription_id: ""
+  
+  # Resource group name (will be created if doesn't exist)
+  resource_group: "draftgenie-prod-rg"
+  
+  # Azure region - choose one close to your users
+  # Popular options: eastus, westus2, westeurope, southeastasia
+  location: "eastus"
+  
+  # Project name - used as prefix for resource names
+  project_name: "draftgenie"
+
+# Container Registry
+container_registry:
+  # Must be globally unique and alphanumeric only (no hyphens)
+  # Suggestion: add random suffix like draftgenieacr12345
+  name: "draftgenieacr"
+  
+  # SKU options: Basic ($5/mo), Standard ($20/mo), Premium ($100/mo)
+  # Basic is sufficient for development
+  sku: "Basic"
+
+# Key Vault
+key_vault:
+  # Must be globally unique
+  # Suggestion: add random suffix like draftgenie-kv-12345
+  name: "draftgenie-kv"
+
+# Monitoring
+monitoring:
+  # Log Analytics Workspace name
+  log_workspace: "draftgenie-logs"
+  
+  # Application Insights name
+  app_insights: "draftgenie-insights"
+
+# PostgreSQL Database
+postgresql:
+  # Server name (must be globally unique)
+  server_name: "draftgenie-postgres"
+  
+  # Database name
+  database_name: "draftgenie"
+  
+  # Admin username
+  admin_user: "draftgenie"
+  
+  # Leave empty to auto-generate secure password
+  admin_password: ""
+  
+  # SKU options for Burstable tier:
+  # - Standard_B1ms (1 vCore, 2GB RAM) - $15/mo
+  # - Standard_B2s (2 vCore, 4GB RAM) - $30/mo
+  sku: "Standard_B1ms"
+  
+  # Tier: Burstable, GeneralPurpose, MemoryOptimized
+  tier: "Burstable"
+  
+  # PostgreSQL version: 11, 12, 13, 14, 15, 16
+  version: "16"
+  
+  # Storage size in GB (32-16384)
+  storage_size: 32
+
+# Redis Cache
+redis:
+  # Redis instance name (must be globally unique)
+  name: "draftgenie-redis"
+  
+  # SKU: Basic, Standard, Premium
+  # Basic is sufficient for development
+  sku: "Basic"
+  
+  # VM size for Basic/Standard:
+  # - c0 (250MB) - $15/mo
+  # - c1 (1GB) - $30/mo
+  # - c2 (2.5GB) - $60/mo
+  vm_size: "c0"
+
+# MongoDB Atlas (Third-party service)
+mongodb:
+  # Get this from MongoDB Atlas after creating a cluster
+  # Format: mongodb+srv://username:password@cluster.mongodb.net/database
+  # Leave empty if setting up later
+  connection_url: ""
+
+# Container Apps Environment
+container_apps:
+  # Environment name
+  environment_name: "draftgenie-env"
+
+# Application Services Configuration
+services:
+  # API Gateway (NestJS)
+  api_gateway:
+    name: "api-gateway"
+    port: 3000
+    cpu: 0.5          # CPU cores
+    memory: "1Gi"     # Memory allocation
+    min_replicas: 1   # Minimum instances
+    max_replicas: 5   # Maximum instances (auto-scaling)
+    ingress: "external"  # Publicly accessible
+  
+  # Speaker Service (NestJS + Prisma)
+  speaker_service:
+    name: "speaker-service"
+    port: 3001
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"  # Only accessible within environment
+  
+  # Draft Service (FastAPI)
+  draft_service:
+    name: "draft-service"
+    port: 3002
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # RAG Service (FastAPI + LangChain)
+  rag_service:
+    name: "rag-service"
+    port: 3003
+    cpu: 1.0          # More CPU for AI workloads
+    memory: "2Gi"     # More memory for embeddings
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # Evaluation Service (FastAPI)
+  evaluation_service:
+    name: "evaluation-service"
+    port: 3004
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # RabbitMQ (Message Queue)
+  rabbitmq:
+    name: "rabbitmq"
+    port: 5672
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 1   # Single instance for development
+    ingress: "internal"
+    image: "rabbitmq:3.13-management-alpine"
+  
+  # Qdrant (Vector Database)
+  qdrant:
+    name: "qdrant"
+    port: 6333
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 1
+    ingress: "internal"
+    image: "qdrant/qdrant:v1.7.4"
+
+# API Keys and Secrets
+secrets:
+  # REQUIRED: Get from https://makersuite.google.com/app/apikey
+  gemini_api_key: "YOUR_GEMINI_API_KEY_HERE"
+  
+  # Leave empty to auto-generate
+  jwt_secret: ""
+  
+  # Leave empty to auto-generate
+  rabbitmq_password: ""
+
+# Deployment Options
+deployment:
+  # Skip building Docker images (use existing images)
+  skip_build: false
+  
+  # Skip database migrations
+  skip_migrations: false
+  
+  # Dry run mode (preview without creating resources)
+  dry_run: false
+  
+  # Auto-approve all prompts (non-interactive)
+  auto_approve: false
+  
+  # Enable verbose logging
+  verbose: false
+  
+  # Resume from last checkpoint
+  resume: false
+
+# Docker Build Configuration
+docker:
+  # Docker registry (leave empty to use ACR)
+  registry: ""
+  
+  # Docker build context
+  build_context: "."
+  
+  # Dockerfiles location
+  dockerfiles:
+    api_gateway: "docker/Dockerfile.api-gateway"
+    speaker_service: "docker/Dockerfile.speaker-service"
+    draft_service: "docker/Dockerfile.draft-service"
+    rag_service: "docker/Dockerfile.rag-service"
+    evaluation_service: "docker/Dockerfile.evaluation-service"
+
+# Networking
+networking:
+  # CORS origin (* for development, specific domain for production)
+  cors_origin: "*"
+  
+  # Enable Swagger documentation
+  swagger_enabled: true
+  
+  # Swagger path
+  swagger_path: "api/docs"
+
+# Tags (applied to all resources)
+tags:
+  Environment: "production"
+  Project: "DraftGenie"
+  ManagedBy: "deployment-script"
+  Owner: "your-name-or-team"
+  CostCenter: ""
+
+# Advanced Options
+advanced:
+  # Retry attempts for failed operations
+  retry_attempts: 3
+  
+  # Retry delay in seconds
+  retry_delay: 5
+  
+  # Timeout for long-running operations (in seconds)
+  operation_timeout: 600
+  
+  # Enable resource cleanup on failure
+  cleanup_on_failure: false
+  
+  # Save deployment state for resume
+  save_state: true
+  
+  # State file location
+  state_file: ".azure-deployment-state.json"
+

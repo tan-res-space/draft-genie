@@ -58,26 +58,54 @@ npm run db:seed
 
 ## 🎮 Running the Application
 
-### Start All Services
+### Start All Services (Recommended)
+
+Use the automated start script to start all services with proper dependency management:
 
 ```bash
-npm run dev:all
+./scripts/start.sh
 ```
 
-This starts all 4 microservices:
+This script will:
+- ✅ Check prerequisites (Docker, Node.js, Python, Poetry)
+- ✅ Check if services are already running
+- ✅ Start Docker infrastructure (PostgreSQL, MongoDB, Qdrant, Redis, RabbitMQ)
+- ✅ Wait for infrastructure to be healthy
+- ✅ Start all microservices in the correct order
+- ✅ Verify each service is healthy before proceeding
+
+All services will start on their configured ports from `config/ports.json`:
 - API Gateway (port 3000)
 - Speaker Service (port 3001)
 - Draft Service (port 3002)
 - RAG Service (port 3003)
+- Evaluation Service (port 3004)
 
-### Start Individual Services
+### Stop All Services
+
+```bash
+./scripts/stop.sh
+```
+
+This will gracefully stop all running microservices and optionally stop Docker infrastructure.
+
+### Alternative: Start Services Manually
+
+If you prefer to start services individually:
 
 ```bash
 # In separate terminals
 npm run dev:speaker
 npm run dev:draft
 npm run dev:rag
+npm run dev:evaluation
 npm run dev:gateway
+```
+
+Or start all at once with npm:
+
+```bash
+npm run dev:all
 ```
 
 ## 🧪 Testing the System
@@ -224,7 +252,24 @@ npm run docker:up
 
 ### Port Conflicts
 
-Edit `docker/.env` and change ports:
+All service ports are centrally configured in `config/ports.json`. To change a port:
+
+1. Edit `config/ports.json` and update the port number
+2. Restart the affected service
+
+Example:
+```json
+{
+  "services": {
+    "api-gateway": {
+      "port": 3000,  // Change this to your desired port
+      ...
+    }
+  }
+}
+```
+
+For infrastructure ports (PostgreSQL, MongoDB, etc.), edit `docker/.env`:
 ```env
 POSTGRES_PORT=5433
 MONGO_PORT=27018
@@ -285,11 +330,14 @@ npm install
 
 ## 💡 Tips
 
-- Use `npm run dev:all` for full system development
-- Check logs with `npm run docker:logs`
+- Use `./scripts/start.sh` to start all services with proper dependency management
+- Use `./scripts/stop.sh` to gracefully stop all services
+- Check logs with `npm run docker:logs` or view individual service logs in `.logs/` directory
 - API docs are your friend: http://localhost:3000/api/docs
 - All services have hot reload enabled
 - Use correlation IDs in logs for debugging
+- All service ports are configured in `config/ports.json` - single source of truth
+- Service logs are saved to `.logs/` directory for debugging
 
 ## 🆘 Need Help?
 

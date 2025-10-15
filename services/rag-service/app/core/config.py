@@ -1,9 +1,54 @@
 """
 Configuration management using Pydantic Settings
 """
-from typing import List
+import json
+import os
+from pathlib import Path
+from typing import List, Union
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def get_port_from_config(service_name: str, default_port: int) -> int:
+    """
+    Read port from centralized config/ports.json file.
+    Falls back to environment variable PORT, then to default_port.
+    """
+    # First check environment variable
+    env_port = os.getenv("PORT")
+    if env_port:
+        return int(env_port)
+
+    # Then check config file
+    try:
+        # Get project root - try multiple strategies
+        config_path = None
+
+        # Strategy 1: Use __file__ if available (4 levels up)
+        if "__file__" in globals():
+            file_path = Path(__file__).resolve()
+            config_path = file_path.parent.parent.parent.parent / "config" / "ports.json"
+
+        # Strategy 2: Search up from current directory
+        if not config_path or not config_path.exists():
+            current = Path.cwd()
+            for _ in range(5):  # Search up to 5 levels
+                test_path = current / "config" / "ports.json"
+                if test_path.exists():
+                    config_path = test_path
+                    break
+                current = current.parent
+
+        if config_path and config_path.exists():
+            with open(config_path, "r") as f:
+                config = json.load(f)
+                port = config.get("services", {}).get(service_name, {}).get("port")
+                if port:
+                    return int(port)
+    except Exception:
+        pass  # Fall back to default
+
+    return default_port
 
 
 class Settings(BaseSettings):
@@ -26,7 +71,7 @@ class Settings(BaseSettings):
     # API
     api_v1_prefix: str = Field(default="/api/v1", description="API v1 prefix")
     host: str = Field(default="0.0.0.0", description="Host")
-    port: int = Field(default=8003, description="Port")
+    port: int = Field(default_factory=lambda: get_port_from_config("rag-service", 3003), description="Port")
 
     # MongoDB
     mongodb_uri: str = Field(

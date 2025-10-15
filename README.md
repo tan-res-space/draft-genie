@@ -81,16 +81,30 @@ DraftGenie uses a **hybrid polyglot microservices architecture**:
 
 7. **Start all services**
    ```bash
+   ./scripts/start.sh
+   ```
+
+   Or use npm:
+   ```bash
    npm run dev:all
    ```
 
 ### Access the Services
+
+All service ports are configured in `config/ports.json`:
 
 - **API Gateway**: http://localhost:3000
 - **API Documentation**: http://localhost:3000/api/docs
 - **Speaker Service**: http://localhost:3001
 - **Draft Service**: http://localhost:3002
 - **RAG Service**: http://localhost:3003
+- **Evaluation Service**: http://localhost:3004
+
+### Stop All Services
+
+```bash
+./scripts/stop.sh
+```
 
 ## 📚 Additional Resources
 
@@ -120,11 +134,16 @@ draft-genie/
 ### Available Scripts
 
 ```bash
+# Service Management (Recommended)
+./scripts/start.sh           # Start all services with dependency management
+./scripts/stop.sh            # Stop all services gracefully
+
 # Development
-npm run dev:all              # Start all services
+npm run dev:all              # Start all services (alternative)
 npm run dev:speaker          # Start speaker service only
 npm run dev:draft            # Start draft service only
 npm run dev:rag              # Start RAG service only
+npm run dev:evaluation       # Start evaluation service only
 npm run dev:gateway          # Start API gateway only
 
 # Build
@@ -147,6 +166,30 @@ npm run docker:logs          # View Docker logs
 # Database
 npm run db:migrate           # Run Prisma migrations
 npm run db:seed              # Seed database with mock data
+```
+
+### Port Configuration
+
+All service ports are centrally managed in `config/ports.json`. This ensures:
+- **Single source of truth** for port assignments
+- **Environment parity** - same ports in dev, test, and production
+- **Easy port management** - change ports in one place
+
+To change a service port:
+1. Edit `config/ports.json`
+2. Update the port number for the desired service
+3. Restart the service
+
+Example:
+```json
+{
+  "services": {
+    "api-gateway": {
+      "port": 3000,
+      "description": "API Gateway - Main entry point"
+    }
+  }
+}
 ```
 
 ## 🧪 Testing

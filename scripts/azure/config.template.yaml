@@ -1,0 +1,247 @@
+# DraftGenie Azure Deployment Configuration Template
+# Copy this file to config.yaml and fill in your values
+
+# Azure Configuration
+azure:
+  # Azure subscription ID (leave empty to use default)
+  subscription_id: ""
+  
+  # Resource group name (will be created if doesn't exist)
+  resource_group: "draftgenie-rg"
+  
+  # Azure region (e.g., eastus, westus2, westeurope)
+  location: "eastus"
+  
+  # Project name (used for naming resources)
+  project_name: "draftgenie"
+
+# Container Registry
+container_registry:
+  # Registry name (must be globally unique, alphanumeric only)
+  name: "draftgenieacr"
+  
+  # SKU: Basic, Standard, or Premium
+  sku: "Basic"
+
+# Key Vault
+key_vault:
+  # Key Vault name (must be globally unique)
+  name: "draftgenie-kv"
+
+# Monitoring
+monitoring:
+  # Log Analytics Workspace name
+  log_workspace: "draftgenie-logs"
+  
+  # Application Insights name
+  app_insights: "draftgenie-insights"
+
+# PostgreSQL Database
+postgresql:
+  # Server name (must be globally unique)
+  server_name: "draftgenie-postgres"
+  
+  # Database name
+  database_name: "draftgenie"
+  
+  # Admin username
+  admin_user: "draftgenie"
+  
+  # Admin password (leave empty to auto-generate)
+  admin_password: ""
+  
+  # SKU: Standard_B1ms, Standard_B2s, Standard_D2s_v3, etc.
+  sku: "Standard_B1ms"
+  
+  # Tier: Burstable, GeneralPurpose, MemoryOptimized
+  tier: "Burstable"
+  
+  # PostgreSQL version
+  version: "16"
+  
+  # Storage size in GB
+  storage_size: 32
+
+# Redis Cache
+redis:
+  # Redis instance name (must be globally unique)
+  name: "draftgenie-redis"
+  
+  # SKU: Basic, Standard, Premium
+  sku: "Basic"
+  
+  # VM size: c0, c1, c2, c3, c4, c5, c6
+  vm_size: "c0"
+
+# MongoDB Atlas (Third-party service)
+mongodb:
+  # MongoDB connection URL (get from MongoDB Atlas)
+  # Format: mongodb+srv://user:password@cluster.mongodb.net/database
+  connection_url: ""
+  
+  # Instructions will be provided if empty
+
+# Container Apps Environment
+container_apps:
+  # Environment name
+  environment_name: "draftgenie-env"
+
+# Application Services Configuration
+services:
+  # API Gateway
+  api_gateway:
+    name: "api-gateway"
+    port: 3000
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 5
+    ingress: "external"
+  
+  # Speaker Service
+  speaker_service:
+    name: "speaker-service"
+    port: 3001
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # Draft Service
+  draft_service:
+    name: "draft-service"
+    port: 3002
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # RAG Service
+  rag_service:
+    name: "rag-service"
+    port: 3003
+    cpu: 1.0
+    memory: "2Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # Evaluation Service
+  evaluation_service:
+    name: "evaluation-service"
+    port: 3004
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 3
+    ingress: "internal"
+  
+  # RabbitMQ
+  rabbitmq:
+    name: "rabbitmq"
+    port: 5672
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 1
+    ingress: "internal"
+    image: "rabbitmq:3.13-management-alpine"
+  
+  # Qdrant
+  qdrant:
+    name: "qdrant"
+    port: 6333
+    cpu: 0.5
+    memory: "1Gi"
+    min_replicas: 1
+    max_replicas: 1
+    ingress: "internal"
+    image: "qdrant/qdrant:v1.7.4"
+
+# API Keys and Secrets
+secrets:
+  # Google Gemini API Key (required)
+  gemini_api_key: ""
+  
+  # JWT Secret (leave empty to auto-generate)
+  jwt_secret: ""
+  
+  # RabbitMQ password (leave empty to auto-generate)
+  rabbitmq_password: ""
+
+# Deployment Options
+deployment:
+  # Skip building Docker images (use existing images)
+  skip_build: false
+  
+  # Skip database migrations
+  skip_migrations: false
+  
+  # Dry run mode (preview without creating resources)
+  dry_run: false
+  
+  # Auto-approve all prompts
+  auto_approve: false
+  
+  # Enable verbose logging
+  verbose: false
+  
+  # Resume from last checkpoint
+  resume: false
+
+# Docker Build Configuration
+docker:
+  # Docker registry to push images to (leave empty to use ACR)
+  registry: ""
+  
+  # Docker build context (relative to project root)
+  build_context: "."
+  
+  # Dockerfiles location
+  dockerfiles:
+    api_gateway: "docker/Dockerfile.api-gateway"
+    speaker_service: "docker/Dockerfile.speaker-service"
+    draft_service: "docker/Dockerfile.draft-service"
+    rag_service: "docker/Dockerfile.rag-service"
+    evaluation_service: "docker/Dockerfile.evaluation-service"
+
+# Networking
+networking:
+  # CORS origin (use * for development, specific domain for production)
+  cors_origin: "*"
+  
+  # Enable Swagger documentation
+  swagger_enabled: true
+  
+  # Swagger path
+  swagger_path: "api/docs"
+
+# Tags (applied to all resources)
+tags:
+  Environment: "production"
+  Project: "DraftGenie"
+  ManagedBy: "deployment-script"
+  Owner: ""
+
+# Advanced Options
+advanced:
+  # Retry attempts for failed operations
+  retry_attempts: 3
+  
+  # Retry delay in seconds
+  retry_delay: 5
+  
+  # Timeout for long-running operations (in seconds)
+  operation_timeout: 600
+  
+  # Enable resource cleanup on failure
+  cleanup_on_failure: false
+  
+  # Save deployment state for resume
+  save_state: true
+  
+  # State file location
+  state_file: ".azure-deployment-state.json"
+

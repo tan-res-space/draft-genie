@@ -6,6 +6,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { getServicePort } from '@draft-genie/common';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -64,7 +65,7 @@ async function bootstrap() {
     );
   }
 
-  const port = process.env.PORT || 3001;
+  const port = getServicePort('speaker-service', 3001);
   await app.listen(port);
 
   logger.log(`🚀 Speaker Service is running on: http://localhost:${port}/api/v1`);

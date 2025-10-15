@@ -1,0 +1,14 @@
+# Python dependencies for DraftGenie deployment scripts
+
+# YAML parsing
+PyYAML>=6.0.1
+
+# Optional: Azure SDK for Python (alternative to Azure CLI)
+# azure-mgmt-resource>=23.0.0
+# azure-mgmt-containerregistry>=10.0.0
+# azure-mgmt-keyvault>=10.0.0
+# azure-mgmt-postgresql>=8.0.0
+# azure-mgmt-redis>=14.0.0
+# azure-mgmt-monitor>=6.0.0
+# azure-identity>=1.12.0
+

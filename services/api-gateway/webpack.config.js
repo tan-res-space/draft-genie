@@ -1,15 +1,11 @@
 const { composePlugins, withNx } = require('@nx/webpack');
 const webpack = require('webpack');
+// Updated to fix bcrypt externalization
 
 module.exports = composePlugins(withNx(), (config) => {
   config.resolve = config.resolve || {};
   config.resolve.fullySpecified = false;
   config.resolve.extensions = ['.ts', '.tsx', '.mjs', '.js', '.jsx', '.json'];
-
-  // Exclude .d.ts files from module resolution
-  config.resolve.extensionAlias = {
-    '.d.ts': false,
-  };
 
   const optionalModules = [
     '@nestjs/microservices/microservices-module',
@@ -33,6 +29,15 @@ module.exports = composePlugins(withNx(), (config) => {
     'node-gyp',
     'npm',
     'kerberos',
+    // Terminus optional dependencies
+    '@nestjs/typeorm',
+    '@nestjs/sequelize',
+    '@nestjs/mongoose',
+    'typeorm',
+    'sequelize',
+    'mongoose',
+    '@grpc/grpc-js',
+    '@grpc/proto-loader',
   ];
 
   config.resolve.alias = {
@@ -68,11 +73,15 @@ module.exports = composePlugins(withNx(), (config) => {
   config.output.libraryTarget = 'commonjs2';
   config.output.chunkFormat = 'commonjs';
 
-  // CRITICAL: Force bundling of @draft-genie/* libs, but keep @nestjs/terminus external
+  // CRITICAL: Force bundling of @draft-genie/* libs, but keep certain modules external
   config.externals = [
     function ({ request }, callback) {
-      // Keep @nestjs/terminus external to avoid .d.ts bundling issues
-      if (request && request.startsWith('@nestjs/terminus')) {
+      // Keep bcrypt external - it has native bindings
+      if (request === 'bcrypt') {
+        return callback(null, 'commonjs ' + request);
+      }
+      // Keep @mapbox/node-pre-gyp external
+      if (request === '@mapbox/node-pre-gyp') {
         return callback(null, 'commonjs ' + request);
       }
       callback();

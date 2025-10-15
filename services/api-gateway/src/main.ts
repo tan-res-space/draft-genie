@@ -8,6 +8,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { getServicePort } from '@draft-genie/common';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -105,7 +106,7 @@ async function bootstrap() {
     );
   }
 
-  const port = Number(process.env['PORT'] ?? 3000);
+  const port = getServicePort('api-gateway', 3000);
   await app.listen(port);
 
   logger.log(`🚀 API Gateway is running on: http://localhost:${port}/api/v1`);

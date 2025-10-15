@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DraftGenie Service Ports Configuration",
+  "description": "Centralized port configuration for all DraftGenie services. This is the single source of truth for port assignments across all environments (development, testing, production).",
+  "version": "1.0.0",
+  "services": {
+    "api-gateway": {
+      "port": 3000,
+      "description": "API Gateway - Main entry point for all client requests",
+      "protocol": "http",
+      "healthEndpoint": "/health"
+    },
+    "speaker-service": {
+      "port": 3001,
+      "description": "Speaker Service - Manages speaker data and profiles",
+      "protocol": "http",
+      "healthEndpoint": "/health"
+    },
+    "draft-service": {
+      "port": 3002,
+      "description": "Draft Service - Handles draft ingestion and processing",
+      "protocol": "http",
+      "healthEndpoint": "/health"
+    },
+    "rag-service": {
+      "port": 3003,
+      "description": "RAG Service - Retrieval-Augmented Generation with Gemini",
+      "protocol": "http",
+      "healthEndpoint": "/health"
+    },
+    "evaluation-service": {
+      "port": 3004,
+      "description": "Evaluation Service - Evaluates draft quality and metrics",
+      "protocol": "http",
+      "healthEndpoint": "/health"
+    }
+  },
+  "infrastructure": {
+    "postgres": {
+      "port": 5432,
+      "description": "PostgreSQL - Primary relational database",
+      "protocol": "tcp"
+    },
+    "mongodb": {
+      "port": 27017,
+      "description": "MongoDB - Document store for drafts",
+      "protocol": "tcp"
+    },
+    "qdrant": {
+      "port": 6333,
+      "description": "Qdrant - Vector database for correction vectors",
+      "protocol": "http",
+      "grpcPort": 6334
+    },
+    "redis": {
+      "port": 6379,
+      "description": "Redis - Caching and session management",
+      "protocol": "tcp"
+    },
+    "rabbitmq": {
+      "port": 5672,
+      "description": "RabbitMQ - Message broker",
+      "protocol": "amqp",
+      "managementPort": 15672
+    }
+  },
+  "notes": [
+    "All services use the same ports in development, testing, and production environments",
+    "To change a port, update this file and restart the affected service",
+    "Port conflicts should be resolved by changing ports in this file only",
+    "Services read their port configuration from this file at startup"
+  ]
+}
+
