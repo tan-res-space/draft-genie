@@ -1,19 +1,66 @@
-FROM node:20-alpine AS base
-
-RUN apk add --no-cache libc6-compat python3 make g++
+# Multi-stage build for Speaker Service
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copy package files and workspace configuration
 COPY package*.json ./
-COPY tsconfig.json ./
 COPY nx.json ./
+COPY tsconfig.json ./
+COPY jest.config.js ./
+COPY jest.preset.js ./
 
-RUN npm ci
+# Copy all apps (project.json files needed for Nx graph)
+COPY apps/ ./apps/
 
-COPY libs ./libs
-COPY apps/speaker-service ./apps/speaker-service
+# Copy workspace dependencies
+COPY libs/ ./libs/
 
+# Install dependencies
+RUN npm ci --legacy-peer-deps
+
+# Generate Prisma client before building
+RUN cd apps/speaker-service && npx prisma generate
+
+# Build the application
+RUN npx nx build speaker-service --prod
+
+# Production stage
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache openssl
+
+# Install production dependencies only
+COPY package*.json ./
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
+
+# Copy built application from builder
+COPY --from=builder /app/dist/apps/speaker-service ./dist
+
+# Copy Prisma schema and generate client
+COPY apps/speaker-service/prisma ./prisma
+RUN npx prisma generate
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nestjs -u 1001
+
+# Change ownership
+RUN chown -R nestjs:nodejs /app
+
+# Switch to non-root user
+USER nestjs
+
+# Expose port
 EXPOSE 3001
 
-CMD ["npm", "run", "dev:speaker"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/v1/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+
+# Start the application
+CMD ["node", "dist/main.js"]
 

@@ -3,20 +3,20 @@ DFN API endpoints
 """
 from typing import List
 from fastapi import APIRouter, HTTPException, Query, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.dfn import DFNResponse
 from app.services.dfn_service import DFNService, get_dfn_service
-from app.db.mongodb import get_database
+from app.db.database import get_db
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/dfn", tags=["dfn"])
 
 
-async def get_dfn_service_dependency() -> DFNService:
+async def get_dfn_service_dependency(session: AsyncSession = Depends(get_db)) -> DFNService:
     """Dependency to get DFNService instance"""
-    db = await get_database()
-    return get_dfn_service(db)
+    return get_dfn_service(session)
 
 
 @router.get("/{dfn_id}", response_model=DFNResponse)

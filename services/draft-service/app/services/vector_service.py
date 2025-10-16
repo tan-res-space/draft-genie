@@ -3,7 +3,7 @@ Vector service - Manage correction vectors and embeddings
 """
 from typing import List, Optional
 from datetime import datetime
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.correction_vector import (
     CorrectionVectorModel,
@@ -11,6 +11,7 @@ from app.models.correction_vector import (
     CorrectionVectorResponse,
 )
 from app.models.draft import DraftModel
+from app.repositories.vector_repository_sql import VectorRepositorySQL
 from app.services.correction_service import CorrectionService
 from app.services.embedding_service import EmbeddingService
 from app.services.draft_service import DraftService
@@ -26,13 +27,12 @@ class VectorService:
 
     def __init__(
         self,
-        db: AsyncIOMotorDatabase,
+        vector_repository: VectorRepositorySQL,
         correction_service: CorrectionService,
         embedding_service: EmbeddingService,
         draft_service: DraftService,
     ):
-        self.db = db
-        self.collection = db.correction_vectors
+        self.vector_repository = vector_repository
         self.correction_service = correction_service
         self.embedding_service = embedding_service
         self.draft_service = draft_service
@@ -67,24 +67,16 @@ class VectorService:
             # Generate embedding
             embedding = self.embedding_service.generate_correction_embedding(patterns)
 
-            # Store in MongoDB
-            vector_dict = vector_create.model_dump()
-            vector_dict["created_at"] = datetime.utcnow()
-            vector_dict["updated_at"] = datetime.utcnow()
-
-            result = await self.collection.insert_one(vector_dict)
-            vector_dict["_id"] = result.inserted_id
-
-            vector_model = CorrectionVectorModel(**vector_dict)
+            # Store in PostgreSQL
+            vector_model = await self.vector_repository.create(vector_create)
 
             # Store embedding in Qdrant
             point = self.embedding_service.create_qdrant_point(vector_model, embedding)
             await qdrant.upsert_vectors([point])
 
             # Update vector with Qdrant point ID
-            await self.collection.update_one(
-                {"_id": result.inserted_id},
-                {"$set": {"qdrant_point_id": vector_model.vector_id}},
+            await self.vector_repository.update_qdrant_point_id(
+                vector_model.vector_id, vector_model.vector_id
             )
             vector_model.qdrant_point_id = vector_model.vector_id
 
@@ -144,37 +136,17 @@ class VectorService:
 
     async def get_vector_by_id(self, vector_id: str) -> Optional[CorrectionVectorModel]:
         """Get correction vector by ID"""
-        vector = await self.collection.find_one({"vector_id": vector_id})
-        if vector:
-            return CorrectionVectorModel(**vector)
-        return None
+        return await self.vector_repository.find_by_id(vector_id)
 
     async def get_vectors_by_speaker(
         self, speaker_id: str, skip: int = 0, limit: int = 100
     ) -> List[CorrectionVectorModel]:
         """Get all correction vectors for a speaker"""
-        cursor = (
-            self.collection.find({"speaker_id": speaker_id})
-            .sort("created_at", -1)
-            .skip(skip)
-            .limit(limit)
-        )
-
-        vectors = []
-        async for vector in cursor:
-            vectors.append(CorrectionVectorModel(**vector))
-
-        return vectors
+        return await self.vector_repository.find_by_speaker(speaker_id, skip, limit)
 
     async def get_vectors_by_draft(self, draft_id: str) -> List[CorrectionVectorModel]:
         """Get all correction vectors for a draft"""
-        cursor = self.collection.find({"draft_id": draft_id})
-
-        vectors = []
-        async for vector in cursor:
-            vectors.append(CorrectionVectorModel(**vector))
-
-        return vectors
+        return await self.vector_repository.find_by_draft(draft_id)
 
     async def search_similar_vectors(
         self,
@@ -244,11 +216,12 @@ class VectorService:
         }
 
 
-def get_vector_service(
-    db: AsyncIOMotorDatabase, draft_service: DraftService
+def get_vector_service_sql(
+    session: AsyncSession, draft_service: DraftService
 ) -> VectorService:
-    """Factory function to create VectorService"""
+    """Factory function to create VectorService with SQLAlchemy"""
+    vector_repository = VectorRepositorySQL(session)
     correction_service = CorrectionService()
     embedding_service = EmbeddingService()
-    return VectorService(db, correction_service, embedding_service, draft_service)
+    return VectorService(vector_repository, correction_service, embedding_service, draft_service)
 

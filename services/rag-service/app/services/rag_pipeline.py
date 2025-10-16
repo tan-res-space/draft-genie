@@ -3,7 +3,7 @@ RAG Pipeline - Orchestrates DFN generation
 """
 import uuid
 from typing import Dict, Any, Optional
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.context_service import ContextService
 from app.services.llm_service import LLMService
@@ -23,14 +23,14 @@ class RAGPipeline:
 
     def __init__(
         self,
-        db: AsyncIOMotorDatabase,
+        session: AsyncSession,
         context_service: ContextService,
         llm_service: LLMService,
         dfn_service: DFNService,
         session_service: RAGSessionService,
         use_agent: bool = True,
     ):
-        self.db = db
+        self.session = session
         self.context_service = context_service
         self.llm_service = llm_service
         self.dfn_service = dfn_service
@@ -376,7 +376,7 @@ class RAGPipeline:
 
 
 def get_rag_pipeline(
-    db: AsyncIOMotorDatabase,
+    session: AsyncSession,
     context_service: ContextService,
     llm_service: LLMService,
     dfn_service: DFNService,
@@ -384,6 +384,6 @@ def get_rag_pipeline(
 ) -> RAGPipeline:
     """Factory function to create RAGPipeline"""
     return RAGPipeline(
-        db, context_service, llm_service, dfn_service, session_service
+        session, context_service, llm_service, dfn_service, session_service
     )
 

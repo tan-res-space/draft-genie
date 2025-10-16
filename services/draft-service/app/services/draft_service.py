@@ -5,7 +5,6 @@ from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from app.models.draft import DraftModel, DraftCreate, DraftUpdate, DraftResponse
-from app.repositories.draft_repository import DraftRepository
 from app.clients.instanote_client import InstaNoteMockClient
 from app.events.publisher import event_publisher
 from app.core.logging import get_logger
@@ -19,7 +18,7 @@ class DraftService:
 
     def __init__(
         self,
-        draft_repository: DraftRepository,
+        draft_repository,  # Can be DraftRepository or DraftRepositorySQL
         instanote_client: InstaNoteMockClient,
     ):
         self.draft_repository = draft_repository
@@ -171,7 +170,7 @@ class DraftService:
         return await self.draft_repository.get_drafts_without_vectors(limit)
 
 
-def get_draft_service(draft_repository: DraftRepository) -> DraftService:
+def get_draft_service(draft_repository) -> DraftService:
     """Factory function to create DraftService"""
     instanote_client = InstaNoteMockClient(
         api_url=settings.instanote_api_url,

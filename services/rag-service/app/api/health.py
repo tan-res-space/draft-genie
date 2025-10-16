@@ -2,7 +2,7 @@
 Health check endpoints
 """
 from fastapi import APIRouter, status
-from app.db.mongodb import mongodb
+from app.db.database import database
 from app.db.qdrant import qdrant
 from app.clients.speaker_client import speaker_client
 from app.clients.draft_client import draft_client
@@ -26,13 +26,13 @@ async def readiness_check() -> dict:
     """
     Readiness check - verifies all dependencies are available
     """
-    mongodb_healthy = await mongodb.health_check()
+    postgres_healthy = await database.health_check()
     qdrant_healthy = await qdrant.health_check()
     speaker_service_healthy = await speaker_client.health_check()
     draft_service_healthy = await draft_client.health_check()
 
     all_healthy = all([
-        mongodb_healthy,
+        postgres_healthy,
         qdrant_healthy,
         speaker_service_healthy,
         draft_service_healthy,
@@ -43,7 +43,7 @@ async def readiness_check() -> dict:
         return {
             "status": "not_ready",
             "dependencies": {
-                "mongodb": mongodb_healthy,
+                "postgresql": postgres_healthy,
                 "qdrant": qdrant_healthy,
                 "speaker_service": speaker_service_healthy,
                 "draft_service": draft_service_healthy,
@@ -53,7 +53,7 @@ async def readiness_check() -> dict:
     return {
         "status": "ready",
         "dependencies": {
-            "mongodb": mongodb_healthy,
+            "postgresql": postgres_healthy,
             "qdrant": qdrant_healthy,
             "speaker_service": speaker_service_healthy,
             "draft_service": draft_service_healthy,

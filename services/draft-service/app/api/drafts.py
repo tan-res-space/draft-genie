@@ -4,20 +4,21 @@ Draft API endpoints
 from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Query, Depends, status
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.draft import DraftCreate, DraftUpdate, DraftResponse
 from app.services.draft_service import DraftService, get_draft_service
-from app.repositories.draft_repository import DraftRepository
-from app.db.mongodb import get_database
+from app.repositories.draft_repository_sql import DraftRepositorySQL
+from app.db.database import get_db
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/drafts", tags=["drafts"])
 
 
-async def get_draft_service_dependency() -> DraftService:
+async def get_draft_service_dependency(session: AsyncSession = Depends(get_db)) -> DraftService:
     """Dependency to get DraftService instance"""
-    db = await get_database()
-    draft_repository = DraftRepository(db)
+    draft_repository = DraftRepositorySQL(session)
     return get_draft_service(draft_repository)
 
 

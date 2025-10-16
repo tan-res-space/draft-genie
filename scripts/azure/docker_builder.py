@@ -1,8 +1,14 @@
 """
 Docker image building and pushing to Azure Container Registry.
+
+This module handles building Docker images with proper platform support (AMD64)
+and pushing them to Azure Container Registry. It includes all fixes from the
+successful shell script implementations.
 """
 
 import os
+import subprocess
+import sys
 from typing import Dict, Any, List, Tuple
 import logging
 from pathlib import Path
@@ -15,7 +21,7 @@ from utils import (
 
 class DockerBuilder:
     """Build and push Docker images to Azure Container Registry."""
-    
+
     def __init__(
         self,
         config: Dict[str, Any],
@@ -25,7 +31,7 @@ class DockerBuilder:
     ):
         """
         Initialize Docker builder.
-        
+
         Args:
             config: Configuration dictionary
             registry_info: Container registry information
@@ -37,7 +43,10 @@ class DockerBuilder:
         self.logger = logger
         self.dry_run = dry_run
         self.project_root = get_project_root()
-        
+
+        # Ensure Docker Desktop bin is in PATH (fix for credential helper)
+        self._ensure_docker_desktop_in_path()
+
         # Service definitions
         self.services = {
             'api-gateway': {
@@ -66,6 +75,22 @@ class DockerBuilder:
                 'build_args': {}
             }
         }
+
+    def _ensure_docker_desktop_in_path(self):
+        """
+        Ensure Docker Desktop bin directory is in PATH.
+        This fixes the docker-credential-desktop not found error.
+        """
+        docker_desktop_bin = "/Applications/Docker.app/Contents/Resources/bin"
+
+        if os.path.exists(docker_desktop_bin):
+            current_path = os.environ.get('PATH', '')
+            if docker_desktop_bin not in current_path:
+                os.environ['PATH'] = f"{docker_desktop_bin}:{current_path}"
+                self.logger.info(f"Added Docker Desktop bin to PATH: {docker_desktop_bin}")
+                print_info("Added Docker Desktop bin directory to PATH")
+        else:
+            self.logger.warning(f"Docker Desktop bin directory not found: {docker_desktop_bin}")
     
     def login_to_registry(self) -> Tuple[bool, str]:
         """
@@ -130,54 +155,69 @@ class DockerBuilder:
     
     def build_image(self, service_name: str, tag: str = "latest") -> Tuple[bool, str]:
         """
-        Build Docker image for a service.
-        
+        Build Docker image for a service with AMD64 platform support.
+
+        This method includes all fixes from successful shell scripts:
+        - Builds for linux/amd64 platform (required for Azure Container Apps)
+        - Uses Docker BuildKit for better logging
+        - Includes proper error handling and logging
+
         Args:
             service_name: Name of the service
             tag: Image tag
-            
+
         Returns:
             Tuple of (success, image_name)
         """
         if service_name not in self.services:
             return False, f"Unknown service: {service_name}"
-        
+
         service = self.services[service_name]
         dockerfile = service['dockerfile']
         context = service['context']
         build_args = service.get('build_args', {})
-        
+
         # Construct image name
         registry_server = self.registry_info['login_server']
         image_name = f"{registry_server}/{service_name}:{tag}"
-        
+
         print_info(f"Building image for {service_name}...")
-        
+        print_info(f"  Platform: linux/amd64 (required for Azure Container Apps)")
+        print_info(f"  Dockerfile: {dockerfile}")
+
         # Check if Dockerfile exists
         dockerfile_path = self.project_root / dockerfile
         if not dockerfile_path.exists():
-            return False, f"Dockerfile not found: {dockerfile}"
-        
-        # Build command
+            error_msg = f"Dockerfile not found: {dockerfile}"
+            self.logger.error(error_msg)
+            return False, error_msg
+
+        # Build command with platform flag for AMD64
+        # This is critical - Azure Container Apps requires linux/amd64 images
         cmd = [
             'docker', 'build',
+            '--platform', 'linux/amd64',  # CRITICAL: Build for AMD64 architecture
             '-f', str(dockerfile_path),
             '-t', image_name
         ]
-        
+
         # Add build args
         for key, value in build_args.items():
             cmd.extend(['--build-arg', f"{key}={value}"])
-        
+
         # Add context
         context_path = self.project_root / context
         cmd.append(str(context_path))
-        
-        # Enable BuildKit for more detailed logging
+
+        # Enable BuildKit for better logging and performance
         buildkit_env = os.environ.copy()
         buildkit_env["DOCKER_BUILDKIT"] = "1"
-        
-        # Run build
+
+        # Log the build command
+        self.logger.info(f"Build command: {' '.join(cmd)}")
+
+        # Run build with detailed logging
+        print_info(f"Running: docker build --platform linux/amd64 ...")
         returncode, stdout, stderr = run_command(
             cmd,
             check=False,
@@ -185,39 +225,50 @@ class DockerBuilder:
             logger=self.logger,
             env=buildkit_env
         )
-        
+
         if returncode == 0:
-            print_success(f"Built image: {image_name}")
+            print_success(f"✓ Successfully built image: {image_name}")
+            self.logger.info(f"Successfully built {service_name}")
             return True, image_name
         else:
-            print_error(f"Failed to build image: {stderr}")
+            error_msg = f"Failed to build {service_name}: {stderr}"
+            print_error(f"✗ Build failed for {service_name}")
+            print_error(f"  Error: {stderr}")
+            self.logger.error(error_msg)
             return False, image_name
     
     def push_image(self, image_name: str) -> Tuple[bool, str]:
         """
-        Push Docker image to registry.
-        
+        Push Docker image to registry with detailed logging.
+
         Args:
             image_name: Full image name with registry
-            
+
         Returns:
             Tuple of (success, message)
         """
-        print_info(f"Pushing image {image_name}...")
-        
+        print_info(f"Pushing image to registry...")
+        print_info(f"  Image: {image_name}")
+
+        self.logger.info(f"Pushing image: {image_name}")
+
         returncode, stdout, stderr = run_command(
             ['docker', 'push', image_name],
             check=False,
             dry_run=self.dry_run,
             logger=self.logger
         )
-        
+
         if returncode == 0:
-            print_success(f"Pushed image: {image_name}")
+            print_success(f"✓ Successfully pushed image: {image_name}")
+            self.logger.info(f"Successfully pushed {image_name}")
             return True, f"Image pushed: {image_name}"
         else:
-            print_error(f"Failed to push image: {stderr}")
-            return False, f"Failed to push image: {stderr}"
+            error_msg = f"Failed to push image: {stderr}"
+            print_error(f"✗ Push failed")
+            print_error(f"  Error: {stderr}")
+            self.logger.error(error_msg)
+            return False, error_msg
     
     def build_and_push_service(self, service_name: str, tag: str = "latest") -> Tuple[bool, str]:
         """
@@ -244,30 +295,40 @@ class DockerBuilder:
     
     def build_and_push_all(self, tag: str = "latest") -> Dict[str, str]:
         """
-        Build and push all service images.
-        
+        Build and push all service images with comprehensive error handling.
+
+        This method includes all fixes from successful shell scripts:
+        - Ensures Docker Desktop bin is in PATH
+        - Builds images with --platform linux/amd64
+        - Provides detailed logging for each step
+        - Handles credential helper issues
+
         Args:
             tag: Image tag
-            
+
         Returns:
             Dictionary mapping service names to image names
         """
         print_header("Building and Pushing Docker Images")
+        print_info("Platform: linux/amd64 (required for Azure Container Apps)")
+        print_info(f"Registry: {self.registry_info['login_server']}")
+        print_info(f"Total services: {len(self.services)}")
+        print_info("")
 
         # Temporarily modify Docker config to remove credential helper
         config_path = os.path.expanduser("~/.docker/config.json")
         original_config = None
         config_modified = False
         images = {}
-        
+
         try:
             if os.path.exists(config_path):
                 with open(config_path, 'r') as f:
                     original_config = f.read()
-                
+
                 import json
                 config_data = json.loads(original_config)
-                
+
                 # Remove credential store settings if they exist
                 modified = False
                 if 'credsStore' in config_data:
@@ -282,46 +343,94 @@ class DockerBuilder:
                         json.dump(config_data, f, indent=4)
                     config_modified = True
                     print_info("Temporarily modified Docker config to remove credential helper.")
+                    self.logger.info("Modified Docker config to remove credential helpers")
 
             # Login to registry first
+            print_info("")
+            print_info("=" * 80)
+            print_info("Logging in to Azure Container Registry...")
+            print_info("=" * 80)
             success, message = self.login_to_registry()
             if not success:
                 print_error(message)
+                self.logger.error(f"Registry login failed: {message}")
                 return {}
-            
+
             print_success(message)
-            
+            print_info("")
+
             # Build and push each service
             failed_services = []
-            
+            successful_services = []
+
             for i, service_name in enumerate(self.services.keys(), 1):
-                print_step(i, len(self.services), f"Building {service_name}")
-                
-                success, image_name = self.build_and_push_service(service_name, tag)
-                
-                if success:
-                    images[service_name] = image_name
-                else:
+                print_info("=" * 80)
+                print_step(i, len(self.services), f"Building and Pushing {service_name}")
+                print_info("=" * 80)
+
+                try:
+                    success, image_name = self.build_and_push_service(service_name, tag)
+
+                    if success:
+                        images[service_name] = image_name
+                        successful_services.append(service_name)
+                        print_success(f"✓ {service_name} completed successfully")
+                    else:
+                        failed_services.append(service_name)
+                        print_error(f"✗ {service_name} failed")
+                        self.logger.error(f"Failed to build/push {service_name}")
+                except Exception as e:
                     failed_services.append(service_name)
-                    print_error(f"Failed to build/push {service_name}")
-            
+                    error_msg = f"Exception while building {service_name}: {str(e)}"
+                    print_error(f"✗ {service_name} failed with exception")
+                    print_error(f"  Error: {str(e)}")
+                    self.logger.exception(error_msg)
+
+                print_info("")
+
             # Summary
-            print("\n" + "=" * 80)
-            print(f"Successfully built and pushed: {len(images)}/{len(self.services)} services")
-            
+            print_info("=" * 80)
+            print_header("Build and Push Summary")
+            print_info("=" * 80)
+            print_info(f"Total services: {len(self.services)}")
+            print_info(f"Successful: {len(successful_services)}")
+            print_info(f"Failed: {len(failed_services)}")
+
+            if successful_services:
+                print_success("\nSuccessfully built and pushed:")
+                for service in successful_services:
+                    print_success(f"  ✓ {service}")
+
             if failed_services:
-                print_error(f"Failed services: {', '.join(failed_services)}")
+                print_error("\nFailed services:")
+                for service in failed_services:
+                    print_error(f"  ✗ {service}")
+                self.logger.error(f"Failed services: {', '.join(failed_services)}")
             else:
-                print_success("All images built and pushed successfully!")
-            
+                print_success("\n🎉 All images built and pushed successfully!")
+                self.logger.info("All images built and pushed successfully")
+
+            print_info("=" * 80)
+
             return images
+
+        except Exception as e:
+            error_msg = f"Fatal error during build and push: {str(e)}"
+            print_error(error_msg)
+            self.logger.exception(error_msg)
+            return {}
 
         finally:
             # Restore original Docker config
             if config_modified and original_config is not None:
-                with open(config_path, 'w') as f:
-                    f.write(original_config)
-                print_info("Restored original Docker config.")
+                try:
+                    with open(config_path, 'w') as f:
+                        f.write(original_config)
+                    print_info("Restored original Docker config.")
+                    self.logger.info("Restored original Docker config")
+                except Exception as e:
+                    print_error(f"Failed to restore Docker config: {str(e)}")
+                    self.logger.error(f"Failed to restore Docker config: {str(e)}")
     
     def get_image_name(self, service_name: str, tag: str = "latest") -> str:
         """

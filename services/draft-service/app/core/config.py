@@ -69,11 +69,10 @@ class Settings(BaseSettings):
     port: int = Field(default_factory=lambda: get_port_from_config("draft-service", 3002), alias="PORT")
     host: str = Field(default="0.0.0.0", alias="HOST")
 
-    # MongoDB
-    mongodb_url: str = Field(alias="MONGODB_URL")
-    mongodb_database: str = Field(default="draftgenie", alias="MONGODB_DATABASE")
-    mongodb_min_pool_size: int = Field(default=10, alias="MONGODB_MIN_POOL_SIZE")
-    mongodb_max_pool_size: int = Field(default=100, alias="MONGODB_MAX_POOL_SIZE")
+    # PostgreSQL Database
+    database_url: str = Field(alias="DATABASE_URL")
+    postgres_pool_size: int = Field(default=10, alias="POSTGRES_POOL_SIZE")
+    postgres_max_overflow: int = Field(default=20, alias="POSTGRES_MAX_OVERFLOW")
 
     # Qdrant
     qdrant_url: str = Field(alias="QDRANT_URL")

@@ -1,0 +1,152 @@
+{
+  "timestamp": "2025-10-16T17:18:44.514714",
+  "resource_group": "draftgenie-rg",
+  "environment": "dg-backend-env",
+  "services": {
+    "api-gateway": {
+      "name": "api-gateway",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "speaker-service": {
+      "name": "speaker-service",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://speaker-service.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "draft-service": {
+      "name": "draft-service",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://draft-service.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "rag-service": {
+      "name": "rag-service",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://rag-service.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "eval-service": {
+      "name": "eval-service",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://eval-service.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "rabbitmq": {
+      "name": "rabbitmq",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://rabbitmq.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 1,
+      "status": "warning"
+    },
+    "qdrant": {
+      "name": "qdrant",
+      "tests": {
+        "running": "passed",
+        "replicas": "passed",
+        "env_vars": "warning"
+      },
+      "running_status": "Running",
+      "replica_count": 1,
+      "url": "https://qdrant.internal.gentleforest-322351b3.southindia.azurecontainerapps.io",
+      "env_var_count": 0,
+      "status": "warning"
+    },
+    "api-gateway-health": {
+      "url": "https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1/health",
+      "expected_status": 200,
+      "status_code": 200,
+      "response_time": 0.192184,
+      "status": "passed"
+    },
+    "backend-services-health": {
+      "url": "https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1/health/services",
+      "expected_status": 200,
+      "status_code": 200,
+      "response_time": 0.18396,
+      "status": "passed"
+    },
+    "swagger-docs": {
+      "url": "https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/docs",
+      "expected_status": 200,
+      "status_code": 200,
+      "response_time": 0.189649,
+      "status": "passed"
+    }
+  },
+  "infrastructure": {
+    "postgresql": {
+      "status": "passed",
+      "state": "Ready",
+      "server": "dg-backend-postgres"
+    },
+    "redis": {
+      "status": "passed",
+      "state": "Succeeded",
+      "name": "dg-backend-redis"
+    },
+    "key_vault": {
+      "status": "passed",
+      "state": "Succeeded",
+      "name": "dg-backend-kv-v01"
+    },
+    "container_registry": {
+      "status": "passed",
+      "state": "Succeeded",
+      "name": "acrdgbackendv01"
+    },
+    "container_environment": {
+      "status": "passed",
+      "state": "Succeeded",
+      "name": "dg-backend-env"
+    }
+  },
+  "summary": {
+    "total_tests": 15,
+    "passed": 8,
+    "failed": 0,
+    "warnings": 7
+  }
+}

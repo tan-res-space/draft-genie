@@ -1,0 +1,170 @@
+{
+  "version": "1.0",
+  "last_updated": "2024-01-15T14:30:45.123456",
+  "steps": {
+    "check_prerequisites": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:05:12.456789",
+      "dependency_hash": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
+      "metadata": {
+        "function": "_step_check_prerequisites"
+      }
+    },
+    "create_resource_group": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:06:23.789012",
+      "dependency_hash": "b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1",
+      "metadata": {
+        "function": "_step_create_resource_group"
+      }
+    },
+    "create_monitoring": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:08:45.234567",
+      "dependency_hash": "c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2",
+      "metadata": {
+        "function": "_step_create_monitoring"
+      }
+    },
+    "create_container_registry": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:10:12.567890",
+      "dependency_hash": "d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3",
+      "metadata": {
+        "function": "_step_create_container_registry"
+      }
+    },
+    "create_key_vault": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:11:34.890123",
+      "dependency_hash": "e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4",
+      "metadata": {
+        "function": "_step_create_key_vault"
+      }
+    },
+    "create_databases": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:25:56.123456",
+      "dependency_hash": "f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5",
+      "metadata": {
+        "function": "_step_create_databases"
+      }
+    },
+    "store_secrets": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:26:23.456789",
+      "dependency_hash": "g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5f6",
+      "metadata": {
+        "function": "_step_store_secrets"
+      }
+    },
+    "create_container_apps_env": {
+      "status": "completed",
+      "timestamp": "2024-01-15T14:28:45.789012",
+      "dependency_hash": "h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5f6g7",
+      "metadata": {
+        "function": "_step_create_container_apps_env"
+      }
+    },
+    "build_and_push_images": {
+      "status": "failed",
+      "timestamp": "2024-01-15T14:29:12.012345",
+      "error": "Docker daemon not running"
+    }
+  },
+  "resources": {
+    "resource_group": {
+      "name": "draftgenie-rg",
+      "location": "eastus"
+    },
+    "log_analytics": {
+      "name": "draftgenie-logs",
+      "id": "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/draftgenie-rg/providers/Microsoft.OperationalInsights/workspaces/draftgenie-logs"
+    },
+    "app_insights": {
+      "name": "draftgenie-insights",
+      "instrumentation_key": "12345678-1234-1234-1234-123456789012"
+    },
+    "container_registry": {
+      "name": "draftgenieacr",
+      "login_server": "draftgenieacr.azurecr.io",
+      "admin_username": "draftgenieacr",
+      "admin_password": "***REDACTED***"
+    },
+    "key_vault": {
+      "name": "draftgenie-kv",
+      "vault_uri": "https://draftgenie-kv.vault.azure.net/"
+    },
+    "postgresql": {
+      "server_name": "draftgenie-postgres",
+      "database_name": "draftgenie",
+      "admin_user": "draftgenie",
+      "admin_password": "***REDACTED***",
+      "connection_string": "postgresql://draftgenie:***@draftgenie-postgres.postgres.database.azure.com:5432/draftgenie?sslmode=require"
+    },
+    "redis": {
+      "name": "draftgenie-redis",
+      "hostname": "draftgenie-redis.redis.cache.windows.net",
+      "ssl_port": 6380,
+      "primary_key": "***REDACTED***",
+      "connection_string": "rediss://:***@draftgenie-redis.redis.cache.windows.net:6380"
+    },
+    "container_apps_env": {
+      "name": "draftgenie-env",
+      "default_domain": "gentleforest-322351b3.eastus.azurecontainerapps.io"
+    }
+  },
+  "completed_steps": [
+    "check_prerequisites",
+    "create_resource_group",
+    "create_monitoring",
+    "create_container_registry",
+    "create_key_vault",
+    "create_databases",
+    "store_secrets",
+    "create_container_apps_env"
+  ],
+  "created_resources": {
+    "resource_group": {
+      "name": "draftgenie-rg",
+      "location": "eastus"
+    },
+    "log_analytics": {
+      "name": "draftgenie-logs",
+      "id": "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/draftgenie-rg/providers/Microsoft.OperationalInsights/workspaces/draftgenie-logs"
+    },
+    "app_insights": {
+      "name": "draftgenie-insights",
+      "instrumentation_key": "12345678-1234-1234-1234-123456789012"
+    },
+    "container_registry": {
+      "name": "draftgenieacr",
+      "login_server": "draftgenieacr.azurecr.io",
+      "admin_username": "draftgenieacr",
+      "admin_password": "***REDACTED***"
+    },
+    "key_vault": {
+      "name": "draftgenie-kv",
+      "vault_uri": "https://draftgenie-kv.vault.azure.net/"
+    },
+    "postgresql": {
+      "server_name": "draftgenie-postgres",
+      "database_name": "draftgenie",
+      "admin_user": "draftgenie",
+      "admin_password": "***REDACTED***",
+      "connection_string": "postgresql://draftgenie:***@draftgenie-postgres.postgres.database.azure.com:5432/draftgenie?sslmode=require"
+    },
+    "redis": {
+      "name": "draftgenie-redis",
+      "hostname": "draftgenie-redis.redis.cache.windows.net",
+      "ssl_port": 6380,
+      "primary_key": "***REDACTED***",
+      "connection_string": "rediss://:***@draftgenie-redis.redis.cache.windows.net:6380"
+    },
+    "container_apps_env": {
+      "name": "draftgenie-env",
+      "default_domain": "gentleforest-322351b3.eastus.azurecontainerapps.io"
+    }
+  }
+}
+

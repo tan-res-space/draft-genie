@@ -3,6 +3,7 @@ RAG API endpoints
 """
 from typing import Dict, Any
 from fastapi import APIRouter, HTTPException, Query, Depends, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services.context_service import ContextService
 from app.services.llm_service import LLMService, get_llm_service
@@ -10,21 +11,20 @@ from app.services.dfn_service import DFNService, get_dfn_service
 from app.services.rag_session_service import RAGSessionService, get_rag_session_service
 from app.services.rag_pipeline import RAGPipeline, get_rag_pipeline
 from app.events.publisher import event_publisher
-from app.db.mongodb import get_database
+from app.db.database import get_db
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/rag", tags=["rag"])
 
 
-async def get_rag_pipeline_dependency() -> RAGPipeline:
+async def get_rag_pipeline_dependency(session: AsyncSession = Depends(get_db)) -> RAGPipeline:
     """Dependency to get RAGPipeline instance"""
-    db = await get_database()
     context_service = ContextService()
     llm_service = get_llm_service()
-    dfn_service = get_dfn_service(db)
-    session_service = get_rag_session_service(db)
-    return get_rag_pipeline(db, context_service, llm_service, dfn_service, session_service)
+    dfn_service = get_dfn_service(session)
+    session_service = get_rag_session_service(session)
+    return get_rag_pipeline(session, context_service, llm_service, dfn_service, session_service)
 
 
 @router.post("/generate", status_code=status.HTTP_201_CREATED)

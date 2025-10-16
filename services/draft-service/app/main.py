@@ -9,13 +9,13 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 from app.core.logging import setup_logging, get_logger
-from app.db.mongodb import mongodb
+from app.db.database import database
 from app.db.qdrant import qdrant
 from app.events.publisher import event_publisher
 from app.events.consumer import event_consumer
 from app.events.handlers import EventHandler
 from app.services.draft_service import get_draft_service
-from app.repositories.draft_repository import DraftRepository
+from app.repositories.draft_repository_sql import DraftRepositorySQL
 from app.api import health_router, drafts_router, vectors_router
 
 # Setup logging
@@ -34,29 +34,30 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     logger.info(f"Environment: {settings.environment}")
     
     try:
-        # Connect to MongoDB
-        await mongodb.connect()
+        # Connect to PostgreSQL
+        await database.connect()
+        logger.info("PostgreSQL connected")
 
         # Connect to Qdrant
         await qdrant.connect()
+        logger.info("Qdrant connected")
 
         # Connect to RabbitMQ (publisher)
         await event_publisher.connect()
+        logger.info("RabbitMQ publisher connected")
 
         # Connect to RabbitMQ (consumer)
         await event_consumer.connect()
+        logger.info("RabbitMQ consumer connected")
 
         # Start consuming events
-        db = mongodb.db
-        if db is not None:
-            draft_repository = DraftRepository(db)
-            draft_service = get_draft_service(draft_repository)
-            event_handler = EventHandler(draft_service)
+        # Note: Event handler will get database session from dependency injection
+        event_handler = EventHandler()
 
-            # Start consuming in background
-            import asyncio
-            asyncio.create_task(event_consumer.start_consuming(event_handler.handle_event))
-            logger.info("Started consuming events from RabbitMQ")
+        # Start consuming in background
+        import asyncio
+        asyncio.create_task(event_consumer.start_consuming(event_handler.handle_event))
+        logger.info("Started consuming events from RabbitMQ")
 
         logger.info("All dependencies connected successfully")
         
@@ -73,12 +74,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
         # Disconnect from RabbitMQ
         await event_consumer.disconnect()
         await event_publisher.disconnect()
+        logger.info("RabbitMQ disconnected")
 
-        # Disconnect from MongoDB
-        await mongodb.disconnect()
+        # Disconnect from PostgreSQL
+        await database.disconnect()
+        logger.info("PostgreSQL disconnected")
 
         # Disconnect from Qdrant
         await qdrant.disconnect()
+        logger.info("Qdrant disconnected")
 
         logger.info("All dependencies disconnected successfully")
         

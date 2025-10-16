@@ -271,19 +271,37 @@ class ContainerAppsDeployer:
     def get_internal_url(self, app_name: str) -> Optional[str]:
         """
         Get the internal URL of a container app.
-        
+
         Args:
             app_name: Application name
-            
+
         Returns:
-            Internal URL or None
+            Internal URL with full FQDN or None
         """
         if self.dry_run:
-            return f"http://{app_name}"
-        
-        # For internal apps, use the app name as the hostname
-        # Container Apps in the same environment can communicate using app names
-        return f"http://{app_name}"
+            return f"http://{app_name}.internal.example.com"
+
+        # Get the internal FQDN for the app
+        returncode, stdout, stderr = run_az_command(
+            [
+                'containerapp', 'show',
+                '--name', app_name,
+                '--resource-group', self.resource_group,
+                '--query', 'properties.configuration.ingress.fqdn',
+                '--output', 'tsv'
+            ],
+            check=False,
+            dry_run=self.dry_run,
+            logger=self.logger
+        )
+
+        if returncode == 0:
+            fqdn = stdout.strip()
+            # Internal apps have .internal. in their FQDN
+            # Return with http:// (not https://) for internal communication
+            return f"http://{fqdn}" if fqdn else None
+
+        return None
     
     def wait_for_app_ready(self, app_name: str, timeout: int = 300) -> bool:
         """

@@ -253,6 +253,17 @@ scripts/
 ├── requirements.txt             # Python dependencies
 ├── deploy-azure.py              # Azure deployment script
 │
+├── docker/                      # Docker build scripts (NEW!)
+│   ├── README.md               # Docker scripts documentation
+│   ├── QUICK_REFERENCE.md      # Quick reference guide
+│   ├── IMPLEMENTATION_SUMMARY.md # Implementation details
+│   ├── build-all-services.sh   # Build all services
+│   ├── build-push-api-gateway.sh        # API Gateway
+│   ├── build-push-speaker-service.sh    # Speaker Service
+│   ├── build-push-draft-service.sh      # Draft Service
+│   ├── build-push-rag-service.sh        # RAG Service
+│   └── build-push-evaluation-service.sh # Evaluation Service
+│
 ├── azure/                       # Azure deployment modules
 │   ├── README.md               # Azure-specific documentation
 │   ├── setup.sh                # Quick setup script
@@ -275,6 +286,50 @@ scripts/
 
 ---
 
+## Docker Build Scripts
+
+### Individual Service Scripts
+
+Build and push Docker images for individual services:
+
+```bash
+# Build and push a single service
+./scripts/docker/build-push-api-gateway.sh
+./scripts/docker/build-push-speaker-service.sh
+./scripts/docker/build-push-draft-service.sh
+./scripts/docker/build-push-rag-service.sh
+./scripts/docker/build-push-evaluation-service.sh
+
+# Build and push all services
+./scripts/docker/build-all-services.sh
+```
+
+**Features:**
+- ✅ Independent service builds
+- ✅ Custom image tags
+- ✅ Dry run mode
+- ✅ Skip build/push options
+- ✅ Parallel execution support
+- ✅ Automatic registry login
+
+**Quick Examples:**
+```bash
+# Build with custom tag
+TAG=v1.2.3 ./scripts/docker/build-push-api-gateway.sh
+
+# Build all services in parallel
+PARALLEL=true ./scripts/docker/build-all-services.sh
+
+# Dry run test
+DRY_RUN=true ./scripts/docker/build-push-draft-service.sh
+```
+
+**Documentation:**
+- Full guide: `scripts/docker/README.md`
+- Quick reference: `scripts/docker/QUICK_REFERENCE.md`
+
+---
+
 ## Features
 
 ### Modular Design
@@ -283,7 +338,7 @@ Each deployment script is broken down into logical modules:
 
 - **Prerequisites Checker** - Validates all requirements
 - **Resource Manager** - Creates cloud resources
-- **Docker Builder** - Builds and pushes images
+- **Docker Builder** - Builds and pushes images (Python or Shell scripts)
 - **Service Deployer** - Deploys applications
 - **Orchestrator** - Coordinates all modules
 

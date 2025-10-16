@@ -4,23 +4,24 @@ Vector API endpoints
 from typing import List
 from fastapi import APIRouter, HTTPException, Query, Depends, status
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.models.correction_vector import CorrectionVectorResponse
-from app.services.vector_service import VectorService, get_vector_service
+from app.services.vector_service import VectorService, get_vector_service_sql
 from app.services.draft_service import DraftService, get_draft_service
-from app.repositories.draft_repository import DraftRepository
-from app.db.mongodb import get_database
+from app.repositories.draft_repository_sql import DraftRepositorySQL
+from app.db.database import get_db
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/api/v1/vectors", tags=["vectors"])
 
 
-async def get_vector_service_dependency() -> VectorService:
+async def get_vector_service_dependency(session: AsyncSession = Depends(get_db)) -> VectorService:
     """Dependency to get VectorService instance"""
-    db = await get_database()
-    draft_repository = DraftRepository(db)
+    draft_repository = DraftRepositorySQL(session)
     draft_service = get_draft_service(draft_repository)
-    return get_vector_service(db, draft_service)
+    return get_vector_service_sql(session, draft_service)
 
 
 @router.post("/generate", status_code=status.HTTP_201_CREATED)

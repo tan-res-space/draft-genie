@@ -6,7 +6,7 @@ from fastapi import APIRouter, status
 from datetime import datetime
 
 from app.core.config import settings
-from app.db.mongodb import mongodb
+from app.db.database import database
 from app.db.qdrant import qdrant
 
 router = APIRouter(prefix="/health", tags=["health"])
@@ -36,19 +36,19 @@ async def readiness_check() -> Dict[str, Any]:
     Checks if service is ready to accept requests
     Verifies all dependencies are available
     """
-    mongodb_healthy = await mongodb.health_check()
+    postgres_healthy = await database.health_check()
     qdrant_healthy = await qdrant.health_check()
-    
-    all_healthy = mongodb_healthy and qdrant_healthy
-    
+
+    all_healthy = postgres_healthy and qdrant_healthy
+
     response = {
         "status": "ready" if all_healthy else "not_ready",
         "service": settings.app_name,
         "version": settings.app_version,
         "timestamp": datetime.utcnow().isoformat(),
         "dependencies": {
-            "mongodb": {
-                "status": "healthy" if mongodb_healthy else "unhealthy",
+            "postgresql": {
+                "status": "healthy" if postgres_healthy else "unhealthy",
                 "required": True,
             },
             "qdrant": {

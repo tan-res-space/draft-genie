@@ -36,9 +36,17 @@ async function bootstrap() {
   );
 
   // CORS
-  const corsOrigin = process.env['CORS_ORIGIN']
-    ? process.env['CORS_ORIGIN'].split(',').map(origin => origin.trim())
-    : '*';
+  const corsOriginEnv = process.env['CORS_ORIGIN'] || '*';
+
+  // Handle CORS origin configuration
+  // When CORS_ORIGIN is '*', we need to use a function to allow all origins
+  // because credentials: true is incompatible with origin: '*'
+  const corsOrigin = corsOriginEnv === '*'
+    ? (_origin: string, callback: (err: Error | null, allow?: boolean) => void) => {
+        // Allow all origins when configured with '*'
+        callback(null, true);
+      }
+    : corsOriginEnv.split(',').map(origin => origin.trim());
 
   app.enableCors({
     origin: corsOrigin,

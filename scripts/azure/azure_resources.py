@@ -743,7 +743,12 @@ class AzureResourceManager:
         if returncode == 0:
             print_info(f"Container Apps environment '{env_name}' already exists, skipping creation.")
             self._mark_step_completed(step_name)
-            self._save_resource('container_apps_env', {'name': env_name})
+            # Get the default domain for existing environment
+            default_domain = self._get_environment_default_domain(env_name)
+            self._save_resource('container_apps_env', {
+                'name': env_name,
+                'default_domain': default_domain
+            })
             return True, env_name
 
         print_info(f"Creating Container Apps environment '{env_name}'...")
@@ -768,10 +773,49 @@ class AzureResourceManager:
 
         if returncode == 0:
             self._mark_step_completed(step_name)
-            self._save_resource('container_apps_env', {'name': env_name})
+            # Get the default domain for the newly created environment
+            default_domain = self._get_environment_default_domain(env_name)
+            self._save_resource('container_apps_env', {
+                'name': env_name,
+                'default_domain': default_domain
+            })
             return True, env_name
         else:
             return False, f"Failed to create Container Apps environment: {stderr}"
+
+    def _get_environment_default_domain(self, env_name: str) -> str:
+        """
+        Get the default domain for a Container Apps environment.
+
+        Args:
+            env_name: Environment name
+
+        Returns:
+            Default domain (e.g., 'gentleforest-322351b3.southindia.azurecontainerapps.io')
+        """
+        if self.dry_run:
+            return "example.azurecontainerapps.io"
+
+        returncode, stdout, stderr = run_az_command(
+            [
+                'containerapp', 'env', 'show',
+                '--name', env_name,
+                '--resource-group', self.resource_group,
+                '--query', 'properties.defaultDomain',
+                '--output', 'tsv'
+            ],
+            check=False,
+            dry_run=self.dry_run,
+            logger=self.logger
+        )
+
+        if returncode == 0:
+            default_domain = stdout.strip()
+            print_info(f"Container Apps environment default domain: {default_domain}")
+            return default_domain
+        else:
+            print_warning(f"Could not retrieve default domain for environment '{env_name}'")
+            return ""
 
     def store_secret_in_keyvault(self, secret_name: str, secret_value: str) -> bool:
         """
@@ -808,4 +852,41 @@ class AzureResourceManager:
         else:
             print_error(f"Failed to store secret '{secret_name}': {stderr}")
             return False
+
+    def get_secret_from_keyvault(self, secret_name: str) -> Optional[str]:
+        """
+        Retrieve a secret from Azure Key Vault.
+
+        Args:
+            secret_name: Name of the secret
+
+        Returns:
+            Secret value or None if not found
+        """
+        if self.dry_run:
+            print_info(f"[DRY RUN] Would retrieve secret '{secret_name}' from Key Vault")
+            return f"dummy-{secret_name}-value"
+
+        kv_name = self.config['key_vault']['name']
+
+        returncode, stdout, stderr = run_az_command(
+            [
+                'keyvault', 'secret', 'show',
+                '--vault-name', kv_name,
+                '--name', secret_name,
+                '--query', 'value',
+                '--output', 'tsv'
+            ],
+            check=False,
+            dry_run=self.dry_run,
+            logger=self.logger
+        )
+
+        if returncode == 0:
+            secret_value = stdout.strip()
+            self.logger.debug(f"Retrieved secret '{secret_name}' from Key Vault")
+            return secret_value
+        else:
+            print_warning(f"Could not retrieve secret '{secret_name}' from Key Vault: {stderr}")
+            return None
 

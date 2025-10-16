@@ -231,14 +231,7 @@ def interactive_config_setup(config_path: str) -> dict:
     config['redis']['name'] = redis
     config['redis']['sku'] = 'Basic'
     config['redis']['vm_size'] = 'c0'
-    
-    # MongoDB
-    print_info("\n=== MongoDB Atlas ===")
-    print_info("You'll need to set up MongoDB Atlas separately.")
-    
-    mongodb_url = input("MongoDB Connection URL (leave empty to set up later): ").strip()
-    config['mongodb']['connection_url'] = mongodb_url
-    
+
     # Container Apps
     config['container_apps']['environment_name'] = f"{project}-env"
     

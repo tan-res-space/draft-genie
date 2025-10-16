@@ -66,10 +66,10 @@ async function bootstrap() {
   }
 
   const port = getServicePort('speaker-service', 3001);
-  await app.listen(port);
+  await app.listen(port, '0.0.0.0');
 
-  logger.log(`🚀 Speaker Service is running on: http://localhost:${port}/api/v1`);
-  logger.log(`📚 API Documentation: http://localhost:${port}/${process.env.SWAGGER_PATH || 'api/docs'}`);
+  logger.log(`🚀 Speaker Service is running on: http://0.0.0.0:${port}/api/v1`);
+  logger.log(`📚 API Documentation: http://0.0.0.0:${port}/${process.env.SWAGGER_PATH || 'api/docs'}`);
 }
 
 bootstrap();

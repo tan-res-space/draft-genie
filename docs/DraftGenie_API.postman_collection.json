@@ -1,0 +1,490 @@
+{
+  "info": {
+    "name": "DraftGenie API",
+    "description": "Complete API collection for DraftGenie microservices platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "draftgenie"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\",\n  \"name\": \"John Doe\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "pm.collectionVariables.set('accessToken', response.accessToken);",
+                  "pm.collectionVariables.set('refreshToken', response.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePassword123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Speakers",
+      "item": [
+        {
+          "name": "Create Speaker",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. John Smith\",\n  \"email\": \"john.smith@hospital.com\",\n  \"bucket\": \"GOOD\",\n  \"externalId\": \"instanote-speaker-12345\",\n  \"notes\": \"Cardiologist with 15 years of experience\",\n  \"metadata\": {\n    \"specialty\": \"Cardiology\",\n    \"hospital\": \"General Hospital\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers"]
+            }
+          }
+        },
+        {
+          "name": "Get All Speakers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers?page=1&limit=20&bucket=GOOD&status=ACTIVE",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"},
+                {"key": "bucket", "value": "GOOD"},
+                {"key": "status", "value": "ACTIVE"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Speaker by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/:speakerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", ":speakerId"],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Speaker",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. John Smith Jr.\",\n  \"status\": \"ACTIVE\",\n  \"notes\": \"Updated notes\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers/:speakerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", ":speakerId"],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Speaker Bucket",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bucket\": \"EXCELLENT\",\n  \"reason\": \"Improved quality metrics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/speakers/:speakerId/bucket",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", ":speakerId", "bucket"],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Speaker",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/:speakerId",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", ":speakerId"],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Speaker Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/statistics",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", "statistics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drafts",
+      "item": [
+        {
+          "name": "Ingest Drafts",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/drafts/ingest?speaker_id=550e8400-e29b-41d4-a716-446655440000&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["drafts", "ingest"],
+              "query": [
+                {"key": "speaker_id", "value": "550e8400-e29b-41d4-a716-446655440000"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Draft",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"draft_id\": \"draft_123456\",\n  \"speaker_id\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"draft_type\": \"AD\",\n  \"original_text\": \"The patient has a history of diabetis.\",\n  \"corrected_text\": \"The patient has a history of diabetes.\",\n  \"word_count\": 8,\n  \"correction_count\": 1,\n  \"metadata\": {\n    \"source\": \"instanote\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/drafts",
+              "host": ["{{baseUrl}}"],
+              "path": ["drafts"]
+            }
+          }
+        },
+        {
+          "name": "Get All Drafts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/drafts?skip=0&limit=100&draft_type=AD",
+              "host": ["{{baseUrl}}"],
+              "path": ["drafts"],
+              "query": [
+                {"key": "skip", "value": "0"},
+                {"key": "limit", "value": "100"},
+                {"key": "draft_type", "value": "AD"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Draft by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/drafts/:draftId",
+              "host": ["{{baseUrl}}"],
+              "path": ["drafts", ":draftId"],
+              "variable": [
+                {
+                  "key": "draftId",
+                  "value": "draft_123456"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Speaker Drafts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/drafts/speaker/:speakerId?skip=0&limit=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["drafts", "speaker", ":speakerId"],
+              "query": [
+                {"key": "skip", "value": "0"},
+                {"key": "limit", "value": "100"}
+              ],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Aggregation",
+      "item": [
+        {
+          "name": "Get Complete Speaker Data",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/speakers/:speakerId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["speakers", ":speakerId", "complete"],
+              "variable": [
+                {
+                  "key": "speakerId",
+                  "value": "550e8400-e29b-41d4-a716-446655440000"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Dashboard Metrics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/metrics",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard", "metrics"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workflow",
+      "item": [
+        {
+          "name": "Generate DFN",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speakerId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"prompt\": \"Generate a professional medical note\",\n  \"options\": {\n    \"useLangGraph\": true,\n    \"maxTokens\": 2000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/workflow/generate-dfn",
+              "host": ["{{baseUrl}}"],
+              "path": ["workflow", "generate-dfn"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "API Gateway Health",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        },
+        {
+          "name": "All Services Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health/services",
+              "host": ["{{baseUrl}}"],
+              "path": ["health", "services"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

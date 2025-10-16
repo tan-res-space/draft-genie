@@ -1,33 +1,23 @@
 # Multi-stage build for Evaluation Service (Python/FastAPI)
-FROM python:3.11-slim AS builder
+FROM python:3.11 AS builder
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    make \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Poetry
-RUN pip install --no-cache-dir poetry==1.7.1
+# Install Poetry (latest version to support package-mode)
+RUN pip install --no-cache-dir poetry==1.8.3
 
 WORKDIR /app
 
 # Copy dependency files
-COPY services/evaluation-service/pyproject.toml services/evaluation-service/poetry.lock ./
+COPY services/evaluation-service/pyproject.toml ./
 
-# Install dependencies
+# Generate new lock file and install dependencies
 RUN poetry config virtualenvs.create false \
+    && poetry lock --no-update \
     && poetry install --no-interaction --no-ansi --no-root --only main
 
 # Production stage
 FROM python:3.11-slim
 
-# Install runtime dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# No additional packages needed - Python has urllib for health checks
 
 WORKDIR /app
 
@@ -45,9 +35,9 @@ USER fastapi
 # Expose port
 EXPOSE 3004
 
-# Health check
+# Health check using Python instead of curl
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD curl -f http://localhost:3004/health || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3004/health')" || exit 1
 
 # Run application
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3004"]

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.logging import setup_logging, get_logger
-from app.db.mongodb import mongodb
+from app.db.database import database
 from app.db.qdrant import qdrant
 from app.api import health_router, rag_router, dfn_router
 from app.events.publisher import event_publisher
@@ -27,9 +27,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"Environment: {settings.environment}")
 
     try:
-        # Connect to MongoDB
-        await mongodb.connect()
-        logger.info("MongoDB connected")
+        # Connect to PostgreSQL
+        await database.connect()
+        logger.info("PostgreSQL connected")
 
         # Connect to Qdrant
         await qdrant.connect()
@@ -51,9 +51,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"Shutting down {settings.app_name}")
 
     try:
-        # Disconnect from MongoDB
-        await mongodb.disconnect()
-        logger.info("MongoDB disconnected")
+        # Disconnect from PostgreSQL
+        await database.disconnect()
+        logger.info("PostgreSQL disconnected")
 
         # Disconnect from Qdrant
         await qdrant.disconnect()

@@ -40,8 +40,8 @@ export class HealthController {
     const evaluationUrl = process.env['EVALUATION_SERVICE_URL'] ?? 'http://localhost:3004';
 
     return this.health.check([
-      () => this.pingCheck('speaker-service', `${speakerUrl}/health`),
-      () => this.pingCheck('draft-service', `${draftUrl}/health`),
+      () => this.pingCheck('speaker-service', `${speakerUrl}/api/v1/health`),
+      () => this.pingCheck('draft-service', `${draftUrl}/api/v1/health`),
       () => this.pingCheck('rag-service', `${ragUrl}/health`),
       () => this.pingCheck('evaluation-service', `${evaluationUrl}/health`),
     ]);

@@ -73,15 +73,13 @@ class Settings(BaseSettings):
     host: str = Field(default="0.0.0.0", description="Host")
     port: int = Field(default_factory=lambda: get_port_from_config("rag-service", 3003), description="Port")
 
-    # MongoDB
-    mongodb_uri: str = Field(
-        default="mongodb://draftgenie:draftgenie123@localhost:27017/draftgenie?authSource=admin", description="MongoDB URI"
+    # PostgreSQL Database
+    database_url: str = Field(
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/draftgenie",
+        description="PostgreSQL database URL"
     )
-    mongodb_database: str = Field(
-        default="draftgenie", description="MongoDB database name"
-    )
-    mongodb_min_pool_size: int = Field(default=10, description="MongoDB min pool size")
-    mongodb_max_pool_size: int = Field(default=100, description="MongoDB max pool size")
+    postgres_pool_size: int = Field(default=10, description="PostgreSQL pool size")
+    postgres_max_overflow: int = Field(default=20, description="PostgreSQL max overflow")
 
     # Qdrant
     qdrant_host: str = Field(default="localhost", description="Qdrant host")

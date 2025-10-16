@@ -1,0 +1,2256 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ui_ux_design_specification.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="draftgenie-uiux-design-specification">DraftGenie UI/UX Design Specification</h1>
+<h2 id="frontend-development-guide--api-integration-reference">Frontend Development Guide &amp; API Integration Reference</h2>
+<p><strong>Version:</strong> 1.0<br>
+<strong>Last Updated:</strong> 2025-10-16<br>
+<strong>Status:</strong> Production Ready<br>
+<strong>Target Audience:</strong> UI/UX Developers, Frontend Engineers, Product Designers</p>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-executive-summary">Executive Summary</a></li>
+<li><a href="#2-design-philosophy--principles">Design Philosophy &amp; Principles</a></li>
+<li><a href="#3-user-personas--roles">User Personas &amp; Roles</a></li>
+<li><a href="#4-core-user-flows">Core User Flows</a></li>
+<li><a href="#5-ui-components--screens">UI Components &amp; Screens</a></li>
+<li><a href="#6-api-integration-guide">API Integration Guide</a></li>
+<li><a href="#7-design-to-api-mapping">Design-to-API Mapping</a></li>
+<li><a href="#8-technical-constraints--requirements">Technical Constraints &amp; Requirements</a></li>
+<li><a href="#9-accessibility--responsive-design">Accessibility &amp; Responsive Design</a></li>
+<li><a href="#10-appendices">Appendices</a></li>
+</ol>
+<hr>
+<h2 id="1-executive-summary">1. Executive Summary</h2>
+<h3 id="11-product-overview">1.1 Product Overview</h3>
+<p><strong>DraftGenie</strong> is a Speaker-centric AI-powered platform that improves medical draft quality by learning from speaker-specific patterns and applying personalized corrections using Retrieval-Augmented Generation (RAG) with Google Gemini.</p>
+<h3 id="12-design-goals">1.2 Design Goals</h3>
+<ul>
+<li><strong>Speaker-First Experience:</strong> All workflows begin with speaker context</li>
+<li><strong>Clarity &amp; Simplicity:</strong> Complex AI processes presented in intuitive interfaces</li>
+<li><strong>Data Transparency:</strong> Clear visualization of quality metrics and improvements</li>
+<li><strong>Efficiency:</strong> Streamlined workflows for common tasks (SSA, BSA, DFN generation)</li>
+<li><strong>Trust &amp; Confidence:</strong> Clear feedback on AI-generated content and quality scores</li>
+</ul>
+<h3 id="13-key-user-journeys">1.3 Key User Journeys</h3>
+<ol>
+<li><strong>Speaker Onboarding</strong> (SSA/BSA) - Add speakers to the system</li>
+<li><strong>Draft Management</strong> - View and manage historical drafts</li>
+<li><strong>AI-Powered Generation</strong> - Generate improved final notes (DFN)</li>
+<li><strong>Quality Evaluation</strong> - Review metrics and bucket assignments</li>
+<li><strong>Dashboard Analytics</strong> - Monitor system-wide performance</li>
+</ol>
+<h3 id="14-technical-foundation">1.4 Technical Foundation</h3>
+<ul>
+<li><strong>Backend:</strong> Azure-hosted microservices (Node.js + Python)</li>
+<li><strong>API Gateway:</strong> <code>https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io</code></li>
+<li><strong>Authentication:</strong> JWT-based with 24-hour token lifetime</li>
+<li><strong>API Documentation:</strong> Swagger UI at <code>/api/docs</code></li>
+</ul>
+<hr>
+<h2 id="2-design-philosophy--principles">2. Design Philosophy &amp; Principles</h2>
+<h3 id="21-core-design-principles">2.1 Core Design Principles</h3>
+<h4 id="211-speaker-centric-design">2.1.1 Speaker-Centric Design</h4>
+<ul>
+<li><strong>Every screen should answer:</strong> &quot;Which speaker am I working with?&quot;</li>
+<li>Speaker context should be persistent and visible throughout workflows</li>
+<li>Quick speaker switching should be available from any screen</li>
+</ul>
+<h4 id="212-progressive-disclosure">2.1.2 Progressive Disclosure</h4>
+<ul>
+<li>Show essential information first, details on demand</li>
+<li>Use expandable sections for complex data (metrics, evaluations)</li>
+<li>Provide drill-down capabilities from summary to detail views</li>
+</ul>
+<h4 id="213-feedback--transparency">2.1.3 Feedback &amp; Transparency</h4>
+<ul>
+<li>Clear loading states for AI operations (can take 10-30 seconds)</li>
+<li>Progress indicators for multi-step workflows</li>
+<li>Explicit success/error messages with actionable guidance</li>
+</ul>
+<h4 id="214-data-visualization">2.1.4 Data Visualization</h4>
+<ul>
+<li>Use color-coded buckets (EXCELLENT → NEEDS_IMPROVEMENT)</li>
+<li>Visual comparison of DFN vs IFN quality</li>
+<li>Trend charts for speaker performance over time</li>
+</ul>
+<h3 id="22-visual-design-language">2.2 Visual Design Language</h3>
+<h4 id="221-color-palette">2.2.1 Color Palette</h4>
+<p><strong>Bucket Colors (Quality Indicators):</strong></p>
+<ul>
+<li>🟢 <strong>EXCELLENT:</strong> <code>#4CAF50</code> (Green)</li>
+<li>🔵 <strong>GOOD:</strong> <code>#2196F3</code> (Blue)</li>
+<li>🟡 <strong>AVERAGE:</strong> <code>#FFC107</code> (Amber)</li>
+<li>🟠 <strong>POOR:</strong> <code>#FF9800</code> (Orange)</li>
+<li>🔴 <strong>NEEDS_IMPROVEMENT:</strong> <code>#F44336</code> (Red)</li>
+</ul>
+<p><strong>System Colors:</strong></p>
+<ul>
+<li><strong>Primary:</strong> <code>#1976D2</code> (Professional Blue)</li>
+<li><strong>Secondary:</strong> <code>#424242</code> (Dark Gray)</li>
+<li><strong>Success:</strong> <code>#4CAF50</code> (Green)</li>
+<li><strong>Warning:</strong> <code>#FF9800</code> (Orange)</li>
+<li><strong>Error:</strong> <code>#F44336</code> (Red)</li>
+<li><strong>Info:</strong> <code>#2196F3</code> (Blue)</li>
+</ul>
+<h4 id="222-typography">2.2.2 Typography</h4>
+<ul>
+<li><strong>Headings:</strong> Sans-serif, bold (e.g., Roboto, Inter, Open Sans)</li>
+<li><strong>Body:</strong> Sans-serif, regular (14-16px for readability)</li>
+<li><strong>Code/IDs:</strong> Monospace (e.g., Roboto Mono, Fira Code)</li>
+<li><strong>Medical Content:</strong> Serif or high-readability sans-serif</li>
+</ul>
+<h4 id="223-spacing--layout">2.2.3 Spacing &amp; Layout</h4>
+<ul>
+<li><strong>Grid System:</strong> 8px base unit (8, 16, 24, 32, 48, 64px)</li>
+<li><strong>Card Padding:</strong> 24px</li>
+<li><strong>Section Spacing:</strong> 32px between major sections</li>
+<li><strong>Responsive Breakpoints:</strong> Mobile (320px), Tablet (768px), Desktop (1024px+)</li>
+</ul>
+<h3 id="23-interaction-patterns">2.3 Interaction Patterns</h3>
+<h4 id="231-loading-states">2.3.1 Loading States</h4>
+<ul>
+<li><strong>Skeleton screens</strong> for list views</li>
+<li><strong>Spinner with message</strong> for AI operations (&quot;Generating DFN with AI...&quot;)</li>
+<li><strong>Progress bars</strong> for multi-step workflows (1/3, 2/3, 3/3)</li>
+</ul>
+<h4 id="232-error-handling">2.3.2 Error Handling</h4>
+<ul>
+<li><strong>Inline validation</strong> for form fields</li>
+<li><strong>Toast notifications</strong> for success/error messages</li>
+<li><strong>Error boundaries</strong> with retry options</li>
+<li><strong>Graceful degradation</strong> when services are unavailable</li>
+</ul>
+<h4 id="233-navigation">2.3.3 Navigation</h4>
+<ul>
+<li><strong>Persistent sidebar</strong> with main sections</li>
+<li><strong>Breadcrumbs</strong> for deep navigation</li>
+<li><strong>Quick actions</strong> in header (Create Speaker, Generate DFN)</li>
+<li><strong>Context menu</strong> for item-specific actions</li>
+</ul>
+<hr>
+<h2 id="3-user-personas--roles">3. User Personas &amp; Roles</h2>
+<h3 id="31-primary-personas">3.1 Primary Personas</h3>
+<h4 id="311-draftgenie-administrator">3.1.1 DraftGenie Administrator</h4>
+<p><strong>Role:</strong> System administrator managing speakers and quality
+<strong>Goals:</strong></p>
+<ul>
+<li>Onboard new speakers efficiently (SSA/BSA)</li>
+<li>Monitor overall system quality metrics</li>
+<li>Reassign speaker buckets based on performance</li>
+<li>Troubleshoot quality issues</li>
+</ul>
+<p><strong>Key Screens:</strong></p>
+<ul>
+<li>Dashboard (overview)</li>
+<li>Speaker Management</li>
+<li>Bulk Operations</li>
+<li>System Settings</li>
+</ul>
+<h4 id="312-quality-analyst">3.1.2 Quality Analyst</h4>
+<p><strong>Role:</strong> Reviews and evaluates draft quality
+<strong>Goals:</strong></p>
+<ul>
+<li>Compare DFN vs IFN quality</li>
+<li>Analyze quality metrics (SER, WER)</li>
+<li>Identify patterns in corrections</li>
+<li>Provide feedback for system improvement</li>
+</ul>
+<p><strong>Key Screens:</strong></p>
+<ul>
+<li>Evaluation Dashboard</li>
+<li>Draft Comparison View</li>
+<li>Metrics &amp; Analytics</li>
+<li>Speaker Performance Reports</li>
+</ul>
+<h4 id="313-medical-professional-speaker">3.1.3 Medical Professional (Speaker)</h4>
+<p><strong>Role:</strong> End user whose drafts are being improved
+<strong>Goals:</strong></p>
+<ul>
+<li>View their own performance metrics</li>
+<li>See improvement over time</li>
+<li>Understand correction patterns</li>
+<li>Access final notes (DFN)</li>
+</ul>
+<p><strong>Key Screens:</strong></p>
+<ul>
+<li>Personal Dashboard</li>
+<li>My Drafts</li>
+<li>My Performance</li>
+<li>Final Notes Library</li>
+</ul>
+<h3 id="32-user-permissions">3.2 User Permissions</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Admin</th>
+<th>Quality Analyst</th>
+<th>Speaker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>View Dashboard</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (Limited)</td>
+</tr>
+<tr>
+<td>Create Speakers</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Update Buckets</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Generate DFN</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>View All Speakers</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>View Own Data</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>System Settings</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-core-user-flows">4. Core User Flows</h2>
+<h3 id="41-speaker-onboarding-flow-ssa---single-speaker-addition">4.1 Speaker Onboarding Flow (SSA - Single Speaker Addition)</h3>
+<h4 id="411-user-journey">4.1.1 User Journey</h4>
+<pre class="hljs"><code><div>1. Admin clicks &quot;Add Speaker&quot; button
+2. Form appears with required fields
+3. Admin enters speaker information
+4. System validates and creates speaker
+5. Background process ingests historical drafts
+6. Success confirmation with speaker profile link
+</div></code></pre>
+<h4 id="412-ui-requirements">4.1.2 UI Requirements</h4>
+<p><strong>Screen:</strong> Speaker Creation Form</p>
+<p><strong>Required Fields:</strong></p>
+<ul>
+<li>Name (text, min 2 chars)</li>
+<li>Email (email format, optional)</li>
+<li>Initial Bucket (dropdown: EXCELLENT, GOOD, AVERAGE, POOR, NEEDS_IMPROVEMENT)</li>
+<li>External ID (text, from InstaNote)</li>
+</ul>
+<p><strong>Optional Fields:</strong></p>
+<ul>
+<li>Notes (textarea, for admin comments)</li>
+<li>Metadata (key-value pairs: specialty, hospital, etc.)</li>
+</ul>
+<p><strong>Validation:</strong></p>
+<ul>
+<li>Real-time validation on blur</li>
+<li>Duplicate check for External ID</li>
+<li>Clear error messages below fields</li>
+</ul>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>Primary: &quot;Create Speaker&quot; (blue button)</li>
+<li>Secondary: &quot;Cancel&quot; (gray button)</li>
+</ul>
+<p><strong>Success State:</strong></p>
+<ul>
+<li>Toast notification: &quot;Speaker created successfully&quot;</li>
+<li>Redirect to speaker profile page</li>
+<li>Show background ingestion status</li>
+</ul>
+<h4 id="413-api-integration">4.1.3 API Integration</h4>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/speakers</code></p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Dr. John Smith"</span>,
+  <span class="hljs-attr">"email"</span>: <span class="hljs-string">"john.smith@hospital.com"</span>,
+  <span class="hljs-attr">"bucket"</span>: <span class="hljs-string">"GOOD"</span>,
+  <span class="hljs-attr">"externalId"</span>: <span class="hljs-string">"instanote-speaker-12345"</span>,
+  <span class="hljs-attr">"notes"</span>: <span class="hljs-string">"Cardiologist with 15 years of experience"</span>,
+  <span class="hljs-attr">"metadata"</span>: {
+    <span class="hljs-attr">"specialty"</span>: <span class="hljs-string">"Cardiology"</span>,
+    <span class="hljs-attr">"hospital"</span>: <span class="hljs-string">"General Hospital"</span>
+  }
+}
+</div></code></pre>
+<p><strong>Response (201 Created):</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"550e8400-e29b-41d4-a716-446655440000"</span>,
+  <span class="hljs-attr">"name"</span>: <span class="hljs-string">"Dr. John Smith"</span>,
+  <span class="hljs-attr">"bucket"</span>: <span class="hljs-string">"GOOD"</span>,
+  <span class="hljs-attr">"status"</span>: <span class="hljs-string">"ACTIVE"</span>,
+  <span class="hljs-attr">"createdAt"</span>: <span class="hljs-string">"2025-10-16T10:30:00Z"</span>
+}
+</div></code></pre>
+<p><strong>Error Handling:</strong></p>
+<ul>
+<li>409 Conflict: &quot;Speaker with this External ID already exists&quot;</li>
+<li>400 Bad Request: Show validation errors inline</li>
+</ul>
+<hr>
+<h3 id="42-batch-speaker-addition-flow-bsa">4.2 Batch Speaker Addition Flow (BSA)</h3>
+<h4 id="421-user-journey">4.2.1 User Journey</h4>
+<pre class="hljs"><code><div>1. Admin clicks &quot;Bulk Import&quot; button
+2. Upload CSV/Excel file or paste data
+3. System validates all entries
+4. Preview table shows validation results
+5. Admin reviews and confirms
+6. System processes speakers sequentially
+7. Progress indicator shows completion status
+8. Summary report with success/failure counts
+</div></code></pre>
+<h4 id="422-ui-requirements">4.2.2 UI Requirements</h4>
+<p><strong>Screen:</strong> Bulk Import Wizard</p>
+<p><strong>Step 1: Upload</strong></p>
+<ul>
+<li>File upload (CSV, XLSX)</li>
+<li>Or paste data (tab-separated)</li>
+<li>Template download link</li>
+</ul>
+<p><strong>Step 2: Validation</strong></p>
+<ul>
+<li>Table preview with validation status</li>
+<li>Color-coded rows (green=valid, red=error)</li>
+<li>Error messages per row</li>
+<li>Option to fix errors inline</li>
+</ul>
+<p><strong>Step 3: Confirmation</strong></p>
+<ul>
+<li>Summary: X valid, Y errors</li>
+<li>Option to proceed with valid only</li>
+<li>Estimated processing time</li>
+</ul>
+<p><strong>Step 4: Processing</strong></p>
+<ul>
+<li>Progress bar (X of Y completed)</li>
+<li>Real-time status updates</li>
+<li>Cancel option</li>
+</ul>
+<p><strong>Step 5: Results</strong></p>
+<ul>
+<li>Success count</li>
+<li>Error count with details</li>
+<li>Download error report</li>
+<li>Link to speaker list</li>
+</ul>
+<h4 id="423-csv-template-format">4.2.3 CSV Template Format</h4>
+<pre class="hljs"><code><div>name,email,bucket,externalId,notes,specialty,hospital
+Dr. John Smith,john@hospital.com,GOOD,inst-001,Cardiologist,Cardiology,General Hospital
+Dr. Jane Doe,jane@hospital.com,EXCELLENT,inst-002,Neurologist,Neurology,City Hospital
+</div></code></pre>
+<hr>
+<h3 id="43-draft-management-flow">4.3 Draft Management Flow</h3>
+<h4 id="431-user-journey---view-speaker-drafts">4.3.1 User Journey - View Speaker Drafts</h4>
+<pre class="hljs"><code><div>1. User navigates to speaker profile
+2. Drafts tab shows list of historical drafts
+3. Filter by type (AD, LD, IFN) and status
+4. Click draft to view details
+5. See original vs corrected text comparison
+6. View correction patterns identified
+</div></code></pre>
+<h4 id="432-ui-requirements">4.3.2 UI Requirements</h4>
+<p><strong>Screen:</strong> Speaker Drafts List</p>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Table view with columns:
+<ul>
+<li>Draft ID (truncated, tooltip shows full)</li>
+<li>Type (badge: AD/LD/IFN)</li>
+<li>Word Count</li>
+<li>Corrections</li>
+<li>Date</li>
+<li>Status (badge: Processed/Pending)</li>
+<li>Actions (View, Compare)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Filters:</strong></p>
+<ul>
+<li>Draft Type (multi-select)</li>
+<li>Date Range (date picker)</li>
+<li>Processing Status (toggle)</li>
+</ul>
+<p><strong>Pagination:</strong></p>
+<ul>
+<li>20 items per page</li>
+<li>Page numbers + Next/Previous</li>
+<li>Jump to page input</li>
+</ul>
+<p><strong>Draft Detail View:</strong></p>
+<ul>
+<li>Side-by-side comparison (Original | Corrected)</li>
+<li>Highlighted differences</li>
+<li>Correction categories (spelling, grammar, terminology)</li>
+<li>Metadata panel (word count, date, source)</li>
+</ul>
+<h4 id="433-api-integration">4.3.3 API Integration</h4>
+<p><strong>List Drafts:</strong> <code>GET /api/v1/drafts/speaker/{speakerId}?skip=0&amp;limit=20</code></p>
+<p><strong>Get Draft Details:</strong> <code>GET /api/v1/drafts/{draftId}</code></p>
+<hr>
+<h3 id="44-ai-powered-dfn-generation-flow">4.4 AI-Powered DFN Generation Flow</h3>
+<h4 id="441-user-journey">4.4.1 User Journey</h4>
+<pre class="hljs"><code><div>1. User selects speaker from list
+2. Clicks &quot;Generate DFN&quot; button
+3. Modal appears with generation options
+4. User enters prompt (optional) and confirms
+5. Loading state shows AI processing (10-30 seconds)
+6. Success: DFN displayed with quality metrics
+7. User can review, edit, or regenerate
+</div></code></pre>
+<h4 id="442-ui-requirements">4.4.2 UI Requirements</h4>
+<p><strong>Screen:</strong> DFN Generation Modal</p>
+<p><strong>Input Section:</strong></p>
+<ul>
+<li>Speaker name (read-only, for context)</li>
+<li>Prompt (textarea, optional, placeholder: &quot;Generate a professional medical note&quot;)</li>
+<li>Advanced options (collapsible):
+<ul>
+<li>Use LangGraph (toggle, default: ON)</li>
+<li>Max Tokens (slider, 500-4000, default: 2000)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Loading State:</strong></p>
+<ul>
+<li>Animated spinner</li>
+<li>Message: &quot;Generating DFN with AI...&quot;</li>
+<li>Sub-message: &quot;This may take 10-30 seconds&quot;</li>
+<li>Progress steps:
+<ol>
+<li>Validating speaker ✓</li>
+<li>Retrieving context ✓</li>
+<li>Generating with AI... ⏳</li>
+</ol>
+</li>
+</ul>
+<p><strong>Success State:</strong></p>
+<ul>
+<li>Generated DFN text (formatted, scrollable)</li>
+<li>Quality metrics panel:
+<ul>
+<li>Confidence Score (0-100%)</li>
+<li>Context Vectors Used (number)</li>
+<li>Generation Time (seconds)</li>
+</ul>
+</li>
+<li>Actions:
+<ul>
+<li>&quot;Accept &amp; Save&quot; (primary)</li>
+<li>&quot;Regenerate&quot; (secondary)</li>
+<li>&quot;Edit&quot; (secondary)</li>
+<li>&quot;Cancel&quot; (tertiary)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Error State:</strong></p>
+<ul>
+<li>Error icon + message</li>
+<li>Possible causes</li>
+<li>&quot;Retry&quot; button</li>
+<li>&quot;Contact Support&quot; link</li>
+</ul>
+<h4 id="443-api-integration">4.4.3 API Integration</h4>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/workflow/generate-dfn</code></p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"speakerId"</span>: <span class="hljs-string">"550e8400-e29b-41d4-a716-446655440000"</span>,
+  <span class="hljs-attr">"prompt"</span>: <span class="hljs-string">"Generate a professional medical note"</span>,
+  <span class="hljs-attr">"options"</span>: {
+    <span class="hljs-attr">"useLangGraph"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"maxTokens"</span>: <span class="hljs-number">2000</span>
+  }
+}
+</div></code></pre>
+<p><strong>Response (201 Created):</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"workflow"</span>: {
+    <span class="hljs-attr">"status"</span>: <span class="hljs-string">"completed"</span>,
+    <span class="hljs-attr">"steps"</span>: [...]
+  },
+  <span class="hljs-attr">"generation"</span>: {
+    <span class="hljs-attr">"dfn_text"</span>: <span class="hljs-string">"Generated medical note..."</span>,
+    <span class="hljs-attr">"confidence"</span>: <span class="hljs-number">0.95</span>
+  },
+  <span class="hljs-attr">"dfn"</span>: {
+    <span class="hljs-attr">"draft_id"</span>: <span class="hljs-string">"dfn_789012"</span>,
+    <span class="hljs-attr">"created_at"</span>: <span class="hljs-string">"2025-10-16T10:35:00Z"</span>
+  }
+}
+</div></code></pre>
+<hr>
+<h3 id="45-quality-evaluation--metrics-flow">4.5 Quality Evaluation &amp; Metrics Flow</h3>
+<h4 id="451-user-journey">4.5.1 User Journey</h4>
+<pre class="hljs"><code><div>1. User navigates to Evaluations section
+2. Dashboard shows aggregate metrics
+3. Filter by speaker, date range, bucket
+4. Click evaluation to see detailed comparison
+5. View DFN vs IFN side-by-side
+6. See quality scores (SER, WER, Similarity)
+7. Review bucket recommendation
+8. Approve or override bucket change
+</div></code></pre>
+<h4 id="452-ui-requirements">4.5.2 UI Requirements</h4>
+<p><strong>Screen:</strong> Evaluation Dashboard</p>
+<p><strong>Metrics Cards (Top Row):</strong></p>
+<ul>
+<li>Total Evaluations (number + trend)</li>
+<li>Average Quality Score (percentage + trend)</li>
+<li>Bucket Distribution (donut chart)</li>
+<li>Recent Activity (timeline)</li>
+</ul>
+<p><strong>Evaluation List:</strong></p>
+<ul>
+<li>Table with columns:
+<ul>
+<li>Speaker Name</li>
+<li>Evaluation Date</li>
+<li>Quality Score (color-coded)</li>
+<li>Current Bucket → Recommended Bucket</li>
+<li>Status (Pending/Approved/Rejected)</li>
+<li>Actions (View Details, Approve)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Evaluation Detail View:</strong></p>
+<ul>
+<li>Header: Speaker info + evaluation metadata</li>
+<li>Comparison Panel:
+<ul>
+<li>Left: IFN (InstaNote Final)</li>
+<li>Right: DFN (DraftGenie Final)</li>
+<li>Diff highlighting</li>
+</ul>
+</li>
+<li>Metrics Panel:
+<ul>
+<li>SER (Sentence Edit Rate): X%</li>
+<li>WER (Word Error Rate): Y%</li>
+<li>Similarity Score: Z%</li>
+<li>Overall Quality: A/100</li>
+</ul>
+</li>
+<li>Bucket Recommendation:
+<ul>
+<li>Current: GOOD</li>
+<li>Recommended: EXCELLENT</li>
+<li>Reason: &quot;Quality score improved by 15%&quot;</li>
+<li>Actions: Approve / Reject / Defer</li>
+</ul>
+</li>
+</ul>
+<h4 id="453-api-integration">4.5.3 API Integration</h4>
+<p><strong>List Evaluations:</strong> <code>GET /api/v1/evaluations?skip=0&amp;limit=20</code></p>
+<p><strong>Get Evaluation Details:</strong> <code>GET /api/v1/evaluations/{evaluationId}</code></p>
+<p><strong>Approve Bucket Change:</strong> <code>PUT /api/v1/speakers/{speakerId}/bucket</code></p>
+<hr>
+<h3 id="46-dashboard--analytics-flow">4.6 Dashboard &amp; Analytics Flow</h3>
+<h4 id="461-user-journey">4.6.1 User Journey</h4>
+<pre class="hljs"><code><div>1. User logs in → lands on dashboard
+2. Overview shows key metrics at a glance
+3. Charts visualize trends over time
+4. Quick actions for common tasks
+5. Recent activity feed
+6. Drill down into specific areas
+</div></code></pre>
+<h4 id="462-ui-requirements">4.6.2 UI Requirements</h4>
+<p><strong>Screen:</strong> Main Dashboard</p>
+<p><strong>Layout:</strong> 3-column grid (responsive)</p>
+<p><strong>Top Section - KPIs:</strong></p>
+<ul>
+<li>Total Speakers (number + change from last month)</li>
+<li>Total Drafts Processed (number + trend)</li>
+<li>Average Quality Score (percentage + trend)</li>
+<li>Active Evaluations (number + pending count)</li>
+</ul>
+<p><strong>Middle Section - Visualizations:</strong></p>
+<ul>
+<li>Speaker Distribution by Bucket (bar chart)</li>
+<li>Quality Trends Over Time (line chart)</li>
+<li>Draft Processing Volume (area chart)</li>
+<li>Top Performing Speakers (leaderboard)</li>
+</ul>
+<p><strong>Bottom Section - Activity:</strong></p>
+<ul>
+<li>Recent Speakers Added (list with avatars)</li>
+<li>Recent DFNs Generated (list with status)</li>
+<li>Pending Evaluations (list with actions)</li>
+<li>System Health (service status indicators)</li>
+</ul>
+<p><strong>Quick Actions (Floating Action Button or Header):</strong></p>
+<ul>
+<li>Add Speaker (SSA)</li>
+<li>Bulk Import (BSA)</li>
+<li>Generate DFN</li>
+<li>View Reports</li>
+</ul>
+<h4 id="463-api-integration">4.6.3 API Integration</h4>
+<p><strong>Dashboard Metrics:</strong> <code>GET /api/v1/dashboard/metrics</code></p>
+<p><strong>Response:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"speakers"</span>: {
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">500</span>,
+    <span class="hljs-attr">"byBucket"</span>: {
+      <span class="hljs-attr">"EXCELLENT"</span>: <span class="hljs-number">50</span>,
+      <span class="hljs-attr">"GOOD"</span>: <span class="hljs-number">200</span>,
+      <span class="hljs-attr">"AVERAGE"</span>: <span class="hljs-number">150</span>,
+      <span class="hljs-attr">"POOR"</span>: <span class="hljs-number">75</span>,
+      <span class="hljs-attr">"NEEDS_IMPROVEMENT"</span>: <span class="hljs-number">25</span>
+    }
+  },
+  <span class="hljs-attr">"drafts"</span>: {
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">"byType"</span>: {...}
+  },
+  <span class="hljs-attr">"summary"</span>: {
+    <span class="hljs-attr">"totalSpeakers"</span>: <span class="hljs-number">500</span>,
+    <span class="hljs-attr">"totalDrafts"</span>: <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">"healthPercentage"</span>: <span class="hljs-number">100</span>
+  }
+}
+</div></code></pre>
+<hr>
+<h2 id="5-ui-components--screens">5. UI Components &amp; Screens</h2>
+<h3 id="51-component-library">5.1 Component Library</h3>
+<h4 id="511-core-components">5.1.1 Core Components</h4>
+<p><strong>SpeakerCard</strong></p>
+<ul>
+<li>Purpose: Display speaker summary in lists</li>
+<li>Props: speaker (object), onClick (function), showActions (boolean)</li>
+<li>Layout:
+<ul>
+<li>Avatar/Initials (left)</li>
+<li>Name + Email (center)</li>
+<li>Bucket badge (right)</li>
+<li>Metadata (bottom, optional)</li>
+</ul>
+</li>
+<li>States: Default, Hover, Selected, Disabled</li>
+</ul>
+<p><strong>BucketBadge</strong></p>
+<ul>
+<li>Purpose: Visual indicator of speaker quality bucket</li>
+<li>Props: bucket (enum), size (sm/md/lg)</li>
+<li>Variants: Filled, Outlined, Minimal</li>
+<li>Colors: Mapped to bucket colors (see 2.2.1)</li>
+</ul>
+<p><strong>DraftComparison</strong></p>
+<ul>
+<li>Purpose: Side-by-side text comparison with diff highlighting</li>
+<li>Props: original (string), corrected (string), showLineNumbers (boolean)</li>
+<li>Features:
+<ul>
+<li>Syntax highlighting for changes</li>
+<li>Line-by-line diff</li>
+<li>Word-level highlighting</li>
+<li>Expand/collapse sections</li>
+</ul>
+</li>
+</ul>
+<p><strong>MetricsPanel</strong></p>
+<ul>
+<li>Purpose: Display quality metrics in consistent format</li>
+<li>Props: metrics (object), layout (horizontal/vertical)</li>
+<li>Metrics:
+<ul>
+<li>SER (progress bar + percentage)</li>
+<li>WER (progress bar + percentage)</li>
+<li>Similarity (circular progress)</li>
+<li>Quality Score (large number + trend)</li>
+</ul>
+</li>
+</ul>
+<p><strong>LoadingState</strong></p>
+<ul>
+<li>Purpose: Consistent loading indicators</li>
+<li>Variants:
+<ul>
+<li>Skeleton (for lists/cards)</li>
+<li>Spinner (for actions)</li>
+<li>Progress (for multi-step workflows)</li>
+</ul>
+</li>
+<li>Props: type (variant), message (string), progress (0-100)</li>
+</ul>
+<h4 id="512-form-components">5.1.2 Form Components</h4>
+<p><strong>SpeakerForm</strong></p>
+<ul>
+<li>Fields: Name, Email, Bucket, External ID, Notes, Metadata</li>
+<li>Validation: Real-time with error messages</li>
+<li>Layout: 2-column on desktop, 1-column on mobile</li>
+<li>Actions: Submit, Cancel, Reset</li>
+</ul>
+<p><strong>BulkImportWizard</strong></p>
+<ul>
+<li>Steps: Upload → Validate → Confirm → Process → Results</li>
+<li>Progress indicator at top</li>
+<li>Step navigation (Next, Previous, Cancel)</li>
+<li>Persistent data across steps</li>
+</ul>
+<p><strong>DFNGenerationForm</strong></p>
+<ul>
+<li>Fields: Speaker (read-only), Prompt, Options</li>
+<li>Collapsible advanced options</li>
+<li>Preview of speaker context</li>
+<li>Submit triggers modal with loading state</li>
+</ul>
+<h3 id="52-screen-specifications">5.2 Screen Specifications</h3>
+<h4 id="521-speaker-list-screen">5.2.1 Speaker List Screen</h4>
+<p><strong>URL:</strong> <code>/speakers</code></p>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Header: Title + Search + Filters + &quot;Add Speaker&quot; button</li>
+<li>Filters: Bucket (multi-select), Status (multi-select), Search (text)</li>
+<li>Table/Grid view toggle</li>
+<li>Pagination at bottom</li>
+</ul>
+<p><strong>Table Columns:</strong></p>
+<ul>
+<li>Name (sortable, clickable)</li>
+<li>Email</li>
+<li>Bucket (badge, filterable)</li>
+<li>Status (badge)</li>
+<li>Drafts Count</li>
+<li>Last Updated (sortable)</li>
+<li>Actions (View, Edit, Delete)</li>
+</ul>
+<p><strong>Grid View:</strong></p>
+<ul>
+<li>SpeakerCard components in responsive grid</li>
+<li>4 columns on desktop, 2 on tablet, 1 on mobile</li>
+</ul>
+<p><strong>Empty State:</strong></p>
+<ul>
+<li>Illustration + message: &quot;No speakers yet&quot;</li>
+<li>&quot;Add Your First Speaker&quot; button</li>
+</ul>
+<h4 id="522-speaker-profile-screen">5.2.2 Speaker Profile Screen</h4>
+<p><strong>URL:</strong> <code>/speakers/{id}</code></p>
+<p><strong>Layout:</strong> Tabbed interface</p>
+<p><strong>Header:</strong></p>
+<ul>
+<li>Speaker name + avatar</li>
+<li>Bucket badge (editable by admin)</li>
+<li>Status indicator</li>
+<li>Actions: Edit, Delete, Generate DFN</li>
+</ul>
+<p><strong>Tabs:</strong></p>
+<ol>
+<li>
+<p><strong>Overview</strong></p>
+<ul>
+<li>Summary metrics</li>
+<li>Recent activity</li>
+<li>Quick stats</li>
+</ul>
+</li>
+<li>
+<p><strong>Drafts</strong></p>
+<ul>
+<li>List of historical drafts</li>
+<li>Filters and search</li>
+<li>Pagination</li>
+</ul>
+</li>
+<li>
+<p><strong>Evaluations</strong></p>
+<ul>
+<li>List of evaluations</li>
+<li>Quality trends chart</li>
+<li>Bucket history</li>
+</ul>
+</li>
+<li>
+<p><strong>Settings</strong></p>
+<ul>
+<li>Edit speaker details</li>
+<li>Manage metadata</li>
+<li>Audit log</li>
+</ul>
+</li>
+</ol>
+<h4 id="523-dfn-generation-screen">5.2.3 DFN Generation Screen</h4>
+<p><strong>URL:</strong> <code>/dfn/generate</code> or Modal</p>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Speaker selection (if not pre-selected)</li>
+<li>Generation form</li>
+<li>Preview panel (after generation)</li>
+<li>Actions panel</li>
+</ul>
+<p><strong>Workflow:</strong></p>
+<ol>
+<li>Select speaker</li>
+<li>Enter prompt (optional)</li>
+<li>Configure options</li>
+<li>Generate (shows loading)</li>
+<li>Review result</li>
+<li>Accept/Regenerate/Edit</li>
+</ol>
+<h4 id="524-evaluation-dashboard-screen">5.2.4 Evaluation Dashboard Screen</h4>
+<p><strong>URL:</strong> <code>/evaluations</code></p>
+<p><strong>Layout:</strong></p>
+<ul>
+<li>Metrics cards at top</li>
+<li>Filters: Speaker, Date Range, Status</li>
+<li>Evaluation list (table)</li>
+<li>Pagination</li>
+</ul>
+<p><strong>Detail View (Modal or Side Panel):</strong></p>
+<ul>
+<li>Evaluation metadata</li>
+<li>DFN vs IFN comparison</li>
+<li>Quality metrics</li>
+<li>Bucket recommendation</li>
+<li>Approval actions</li>
+</ul>
+<hr>
+<h2 id="6-api-integration-guide">6. API Integration Guide</h2>
+<h3 id="61-authentication-flow">6.1 Authentication Flow</h3>
+<h4 id="611-initial-setup">6.1.1 Initial Setup</h4>
+<p><strong>Base URL:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> API_BASE_URL = <span class="hljs-string">'https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1'</span>;
+</div></code></pre>
+<p><strong>API Client Configuration:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">import</span> axios <span class="hljs-keyword">from</span> <span class="hljs-string">'axios'</span>;
+
+<span class="hljs-keyword">const</span> apiClient = axios.create({
+  <span class="hljs-attr">baseURL</span>: API_BASE_URL,
+  <span class="hljs-attr">headers</span>: {
+    <span class="hljs-string">'Content-Type'</span>: <span class="hljs-string">'application/json'</span>,
+  },
+  <span class="hljs-attr">timeout</span>: <span class="hljs-number">30000</span>, <span class="hljs-comment">// 30 seconds for AI operations</span>
+});
+</div></code></pre>
+<h4 id="612-token-management">6.1.2 Token Management</h4>
+<p><strong>Store Tokens:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">// After successful login</span>
+localStorage.setItem(<span class="hljs-string">'accessToken'</span>, response.data.accessToken);
+localStorage.setItem(<span class="hljs-string">'refreshToken'</span>, response.data.refreshToken);
+</div></code></pre>
+<p><strong>Add Token to Requests:</strong></p>
+<pre class="hljs"><code><div>apiClient.interceptors.request.use(<span class="hljs-function">(<span class="hljs-params">config</span>) =&gt;</span> {
+  <span class="hljs-keyword">const</span> token = localStorage.getItem(<span class="hljs-string">'accessToken'</span>);
+  <span class="hljs-keyword">if</span> (token) {
+    config.headers.Authorization = <span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span>;
+  }
+  <span class="hljs-keyword">return</span> config;
+});
+</div></code></pre>
+<p><strong>Handle Token Refresh:</strong></p>
+<pre class="hljs"><code><div>apiClient.interceptors.response.use(
+  <span class="hljs-function">(<span class="hljs-params">response</span>) =&gt;</span> response,
+  <span class="hljs-keyword">async</span> (error) =&gt; {
+    <span class="hljs-keyword">if</span> (error.response?.status === <span class="hljs-number">401</span>) {
+      <span class="hljs-keyword">const</span> refreshToken = localStorage.getItem(<span class="hljs-string">'refreshToken'</span>);
+      <span class="hljs-keyword">if</span> (refreshToken) {
+        <span class="hljs-keyword">try</span> {
+          <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> axios.post(<span class="hljs-string">`<span class="hljs-subst">${API_BASE_URL}</span>/auth/refresh`</span>, {
+            refreshToken,
+          });
+          localStorage.setItem(<span class="hljs-string">'accessToken'</span>, data.accessToken);
+          localStorage.setItem(<span class="hljs-string">'refreshToken'</span>, data.refreshToken);
+
+          <span class="hljs-comment">// Retry original request</span>
+          error.config.headers.Authorization = <span class="hljs-string">`Bearer <span class="hljs-subst">${data.accessToken}</span>`</span>;
+          <span class="hljs-keyword">return</span> axios(error.config);
+        } <span class="hljs-keyword">catch</span> (refreshError) {
+          <span class="hljs-comment">// Redirect to login</span>
+          <span class="hljs-built_in">window</span>.location.href = <span class="hljs-string">'/login'</span>;
+        }
+      }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Promise</span>.reject(error);
+  }
+);
+</div></code></pre>
+<h4 id="613-loginlogout">6.1.3 Login/Logout</h4>
+<p><strong>Login:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">login</span>(<span class="hljs-params">email, password</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.post(<span class="hljs-string">'/auth/login'</span>, { email, password });
+  localStorage.setItem(<span class="hljs-string">'accessToken'</span>, data.accessToken);
+  localStorage.setItem(<span class="hljs-string">'refreshToken'</span>, data.refreshToken);
+  <span class="hljs-keyword">return</span> data.user;
+}
+</div></code></pre>
+<p><strong>Logout:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">logout</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> refreshToken = localStorage.getItem(<span class="hljs-string">'refreshToken'</span>);
+  <span class="hljs-keyword">await</span> apiClient.post(<span class="hljs-string">'/auth/logout'</span>, { refreshToken });
+  localStorage.removeItem(<span class="hljs-string">'accessToken'</span>);
+  localStorage.removeItem(<span class="hljs-string">'refreshToken'</span>);
+  <span class="hljs-built_in">window</span>.location.href = <span class="hljs-string">'/login'</span>;
+}
+</div></code></pre>
+<h3 id="62-speaker-management-apis">6.2 Speaker Management APIs</h3>
+<h4 id="621-create-speaker">6.2.1 Create Speaker</h4>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/speakers</code></p>
+<p><strong>UI Trigger:</strong> &quot;Add Speaker&quot; button click</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">createSpeaker</span>(<span class="hljs-params">speakerData</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.post(<span class="hljs-string">'/speakers'</span>, {
+    <span class="hljs-attr">name</span>: speakerData.name,
+    <span class="hljs-attr">email</span>: speakerData.email,
+    <span class="hljs-attr">bucket</span>: speakerData.bucket,
+    <span class="hljs-attr">externalId</span>: speakerData.externalId,
+    <span class="hljs-attr">notes</span>: speakerData.notes,
+    <span class="hljs-attr">metadata</span>: speakerData.metadata
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Success Handling:</strong></p>
+<ul>
+<li>Show toast: &quot;Speaker created successfully&quot;</li>
+<li>Redirect to speaker profile: <code>/speakers/${data.id}</code></li>
+<li>Trigger background draft ingestion (automatic)</li>
+</ul>
+<p><strong>Error Handling:</strong></p>
+<ul>
+<li>409 Conflict: &quot;Speaker with this External ID already exists&quot;</li>
+<li>400 Bad Request: Display validation errors inline</li>
+<li>500 Server Error: &quot;Unable to create speaker. Please try again.&quot;</li>
+</ul>
+<h4 id="622-list-speakers">6.2.2 List Speakers</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/speakers</code></p>
+<p><strong>UI Trigger:</strong> Navigate to speakers list</p>
+<p><strong>Request with Filters:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSpeakers</span>(<span class="hljs-params">filters</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">'/speakers'</span>, {
+    <span class="hljs-attr">params</span>: {
+      <span class="hljs-attr">page</span>: filters.page || <span class="hljs-number">1</span>,
+      <span class="hljs-attr">limit</span>: filters.limit || <span class="hljs-number">20</span>,
+      <span class="hljs-attr">bucket</span>: filters.bucket, <span class="hljs-comment">// Optional</span>
+      <span class="hljs-attr">status</span>: filters.status, <span class="hljs-comment">// Optional</span>
+      <span class="hljs-attr">search</span>: filters.search, <span class="hljs-comment">// Optional</span>
+      <span class="hljs-attr">sortBy</span>: filters.sortBy || <span class="hljs-string">'createdAt'</span>,
+      <span class="hljs-attr">sortOrder</span>: filters.sortOrder || <span class="hljs-string">'desc'</span>
+    }
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Response Structure:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"data"</span>: [...], <span class="hljs-comment">// Array of speaker objects</span>
+  <span class="hljs-attr">"pagination"</span>: {
+    <span class="hljs-attr">"page"</span>: <span class="hljs-number">1</span>,
+    <span class="hljs-attr">"limit"</span>: <span class="hljs-number">20</span>,
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">150</span>,
+    <span class="hljs-attr">"totalPages"</span>: <span class="hljs-number">8</span>,
+    <span class="hljs-attr">"hasNext"</span>: <span class="hljs-literal">true</span>,
+    <span class="hljs-attr">"hasPrevious"</span>: <span class="hljs-literal">false</span>
+  }
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Populate table/grid with <code>data</code> array</li>
+<li>Update pagination controls with <code>pagination</code> object</li>
+<li>Show loading skeleton while fetching</li>
+<li>Show empty state if <code>data</code> is empty</li>
+</ul>
+<h4 id="623-get-speaker-details">6.2.3 Get Speaker Details</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/speakers/{id}</code></p>
+<p><strong>UI Trigger:</strong> Click speaker name or &quot;View&quot; button</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSpeaker</span>(<span class="hljs-params">speakerId</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">`/speakers/<span class="hljs-subst">${speakerId}</span>`</span>);
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Populate speaker profile header</li>
+<li>Display metadata in overview tab</li>
+<li>Enable tab navigation</li>
+</ul>
+<h4 id="624-update-speaker">6.2.4 Update Speaker</h4>
+<p><strong>Endpoint:</strong> <code>PATCH /api/v1/speakers/{id}</code></p>
+<p><strong>UI Trigger:</strong> &quot;Save&quot; button in edit form</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateSpeaker</span>(<span class="hljs-params">speakerId, updates</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.patch(<span class="hljs-string">`/speakers/<span class="hljs-subst">${speakerId}</span>`</span>, updates);
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Optimistic Update:</strong></p>
+<ul>
+<li>Update UI immediately</li>
+<li>Revert if API call fails</li>
+<li>Show success toast on confirmation</li>
+</ul>
+<h4 id="625-update-speaker-bucket">6.2.5 Update Speaker Bucket</h4>
+<p><strong>Endpoint:</strong> <code>PUT /api/v1/speakers/{id}/bucket</code></p>
+<p><strong>UI Trigger:</strong> Approve bucket recommendation</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">updateBucket</span>(<span class="hljs-params">speakerId, newBucket, reason</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.put(<span class="hljs-string">`/speakers/<span class="hljs-subst">${speakerId}</span>/bucket`</span>, {
+    <span class="hljs-attr">bucket</span>: newBucket,
+    <span class="hljs-attr">reason</span>: reason
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Update bucket badge immediately</li>
+<li>Show success animation</li>
+<li>Refresh evaluation status</li>
+</ul>
+<h3 id="63-draft-management-apis">6.3 Draft Management APIs</h3>
+<h4 id="631-ingest-drafts">6.3.1 Ingest Drafts</h4>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/drafts/ingest</code></p>
+<p><strong>UI Trigger:</strong> &quot;Ingest Drafts&quot; button (automatic after speaker creation)</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">ingestDrafts</span>(<span class="hljs-params">speakerId, limit = <span class="hljs-number">10</span></span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.post(<span class="hljs-string">'/drafts/ingest'</span>, <span class="hljs-literal">null</span>, {
+    <span class="hljs-attr">params</span>: { <span class="hljs-attr">speaker_id</span>: speakerId, limit }
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Show progress indicator</li>
+<li>Display success message with count</li>
+<li>Refresh drafts list</li>
+</ul>
+<h4 id="632-get-speaker-drafts">6.3.2 Get Speaker Drafts</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/drafts/speaker/{speakerId}</code></p>
+<p><strong>UI Trigger:</strong> Navigate to speaker's Drafts tab</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getSpeakerDrafts</span>(<span class="hljs-params">speakerId, filters</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">`/drafts/speaker/<span class="hljs-subst">${speakerId}</span>`</span>, {
+    <span class="hljs-attr">params</span>: {
+      <span class="hljs-attr">skip</span>: filters.skip || <span class="hljs-number">0</span>,
+      <span class="hljs-attr">limit</span>: filters.limit || <span class="hljs-number">100</span>,
+      <span class="hljs-attr">draft_type</span>: filters.draftType, <span class="hljs-comment">// Optional: AD, LD, IFN</span>
+      <span class="hljs-attr">is_processed</span>: filters.isProcessed <span class="hljs-comment">// Optional: true/false</span>
+    }
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Populate drafts table</li>
+<li>Apply filters</li>
+<li>Show processing status badges</li>
+</ul>
+<h3 id="64-ai-workflow-apis">6.4 AI Workflow APIs</h3>
+<h4 id="641-generate-dfn">6.4.1 Generate DFN</h4>
+<p><strong>Endpoint:</strong> <code>POST /api/v1/workflow/generate-dfn</code></p>
+<p><strong>UI Trigger:</strong> &quot;Generate DFN&quot; button</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">generateDFN</span>(<span class="hljs-params">speakerId, prompt, options</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.post(<span class="hljs-string">'/workflow/generate-dfn'</span>, {
+    speakerId,
+    <span class="hljs-attr">prompt</span>: prompt || <span class="hljs-string">'Generate a professional medical note'</span>,
+    <span class="hljs-attr">options</span>: {
+      <span class="hljs-attr">useLangGraph</span>: options?.useLangGraph ?? <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">maxTokens</span>: options?.maxTokens ?? <span class="hljs-number">2000</span>
+    }
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Loading State (Important!):</strong></p>
+<ul>
+<li>Show modal with loading spinner</li>
+<li>Display message: &quot;Generating DFN with AI...&quot;</li>
+<li>Show progress steps:
+<ol>
+<li>Validating speaker ✓</li>
+<li>Retrieving context ✓</li>
+<li>Generating with AI... ⏳</li>
+</ol>
+</li>
+<li>Timeout: 60 seconds (AI operations can be slow)</li>
+</ul>
+<p><strong>Success Handling:</strong></p>
+<ul>
+<li>Display generated DFN text</li>
+<li>Show quality metrics (confidence, vectors used, time)</li>
+<li>Enable actions: Accept, Regenerate, Edit</li>
+</ul>
+<p><strong>Error Handling:</strong></p>
+<ul>
+<li>Show error message with retry option</li>
+<li>Log error for debugging</li>
+<li>Provide &quot;Contact Support&quot; link</li>
+</ul>
+<h3 id="65-evaluation-apis">6.5 Evaluation APIs</h3>
+<h4 id="651-list-evaluations">6.5.1 List Evaluations</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/evaluations</code></p>
+<p><strong>UI Trigger:</strong> Navigate to evaluations dashboard</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getEvaluations</span>(<span class="hljs-params">filters</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">'/evaluations'</span>, {
+    <span class="hljs-attr">params</span>: {
+      <span class="hljs-attr">skip</span>: filters.skip || <span class="hljs-number">0</span>,
+      <span class="hljs-attr">limit</span>: filters.limit || <span class="hljs-number">20</span>
+    }
+  });
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<h4 id="652-get-evaluation-details">6.5.2 Get Evaluation Details</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/evaluations/{id}</code></p>
+<p><strong>UI Trigger:</strong> Click evaluation row</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getEvaluation</span>(<span class="hljs-params">evaluationId</span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">`/evaluations/<span class="hljs-subst">${evaluationId}</span>`</span>);
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Response Structure:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"eval-123"</span>,
+  <span class="hljs-attr">"speaker_id"</span>: <span class="hljs-string">"speaker-456"</span>,
+  <span class="hljs-attr">"dfn_id"</span>: <span class="hljs-string">"dfn-789"</span>,
+  <span class="hljs-attr">"ifn_id"</span>: <span class="hljs-string">"ifn-012"</span>,
+  <span class="hljs-attr">"metrics"</span>: {
+    <span class="hljs-attr">"ser"</span>: <span class="hljs-number">0.15</span>,
+    <span class="hljs-attr">"wer"</span>: <span class="hljs-number">0.08</span>,
+    <span class="hljs-attr">"similarity"</span>: <span class="hljs-number">0.92</span>,
+    <span class="hljs-attr">"quality_score"</span>: <span class="hljs-number">87.5</span>
+  },
+  <span class="hljs-attr">"recommended_bucket"</span>: <span class="hljs-string">"EXCELLENT"</span>,
+  <span class="hljs-attr">"status"</span>: <span class="hljs-string">"PENDING"</span>
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Display DFN vs IFN comparison</li>
+<li>Show metrics with visual indicators</li>
+<li>Display bucket recommendation</li>
+<li>Enable approval actions</li>
+</ul>
+<h3 id="66-dashboard-apis">6.6 Dashboard APIs</h3>
+<h4 id="661-get-dashboard-metrics">6.6.1 Get Dashboard Metrics</h4>
+<p><strong>Endpoint:</strong> <code>GET /api/v1/dashboard/metrics</code></p>
+<p><strong>UI Trigger:</strong> Load dashboard page</p>
+<p><strong>Request:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getDashboardMetrics</span>(<span class="hljs-params"></span>) </span>{
+  <span class="hljs-keyword">const</span> { data } = <span class="hljs-keyword">await</span> apiClient.get(<span class="hljs-string">'/dashboard/metrics'</span>);
+  <span class="hljs-keyword">return</span> data;
+}
+</div></code></pre>
+<p><strong>Response Structure:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"speakers"</span>: {
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">500</span>,
+    <span class="hljs-attr">"byBucket"</span>: {
+      <span class="hljs-attr">"EXCELLENT"</span>: <span class="hljs-number">50</span>,
+      <span class="hljs-attr">"GOOD"</span>: <span class="hljs-number">200</span>,
+      <span class="hljs-attr">"AVERAGE"</span>: <span class="hljs-number">150</span>,
+      <span class="hljs-attr">"POOR"</span>: <span class="hljs-number">75</span>,
+      <span class="hljs-attr">"NEEDS_IMPROVEMENT"</span>: <span class="hljs-number">25</span>
+    }
+  },
+  <span class="hljs-attr">"drafts"</span>: {
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">"byType"</span>: {...}
+  },
+  <span class="hljs-attr">"evaluations"</span>: {
+    <span class="hljs-attr">"total"</span>: <span class="hljs-number">1200</span>,
+    <span class="hljs-attr">"completed"</span>: <span class="hljs-number">1000</span>
+  },
+  <span class="hljs-attr">"summary"</span>: {
+    <span class="hljs-attr">"healthPercentage"</span>: <span class="hljs-number">100</span>
+  }
+}
+</div></code></pre>
+<p><strong>UI Updates:</strong></p>
+<ul>
+<li>Populate KPI cards</li>
+<li>Render charts (bucket distribution, trends)</li>
+<li>Update activity feed</li>
+<li>Show system health status</li>
+</ul>
+<hr>
+<h2 id="7-design-to-api-mapping">7. Design-to-API Mapping</h2>
+<h3 id="71-screen-to-endpoint-mapping">7.1 Screen-to-Endpoint Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Screen</th>
+<th>Primary Endpoints</th>
+<th>Secondary Endpoints</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Login</strong></td>
+<td><code>POST /auth/login</code></td>
+<td><code>POST /auth/refresh</code></td>
+</tr>
+<tr>
+<td><strong>Dashboard</strong></td>
+<td><code>GET /dashboard/metrics</code></td>
+<td><code>GET /health/services</code></td>
+</tr>
+<tr>
+<td><strong>Speaker List</strong></td>
+<td><code>GET /speakers</code></td>
+<td><code>GET /speakers/statistics</code></td>
+</tr>
+<tr>
+<td><strong>Speaker Profile</strong></td>
+<td><code>GET /speakers/{id}</code></td>
+<td><code>GET /drafts/speaker/{id}</code>, <code>GET /evaluations</code></td>
+</tr>
+<tr>
+<td><strong>Add Speaker</strong></td>
+<td><code>POST /speakers</code></td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>Bulk Import</strong></td>
+<td><code>POST /speakers</code> (loop)</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>Drafts Tab</strong></td>
+<td><code>GET /drafts/speaker/{id}</code></td>
+<td><code>GET /drafts/{id}</code></td>
+</tr>
+<tr>
+<td><strong>Generate DFN</strong></td>
+<td><code>POST /workflow/generate-dfn</code></td>
+<td><code>GET /speakers/{id}</code></td>
+</tr>
+<tr>
+<td><strong>Evaluations</strong></td>
+<td><code>GET /evaluations</code></td>
+<td><code>GET /evaluations/{id}</code></td>
+</tr>
+<tr>
+<td><strong>Evaluation Detail</strong></td>
+<td><code>GET /evaluations/{id}</code></td>
+<td><code>PUT /speakers/{id}/bucket</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="72-user-action-to-api-mapping">7.2 User Action-to-API Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>User Action</th>
+<th>API Call</th>
+<th>UI Update</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Click &quot;Add Speaker&quot;</td>
+<td><code>POST /speakers</code></td>
+<td>Show success toast, redirect to profile</td>
+</tr>
+<tr>
+<td>Search speakers</td>
+<td><code>GET /speakers?search={query}</code></td>
+<td>Update table with filtered results</td>
+</tr>
+<tr>
+<td>Filter by bucket</td>
+<td><code>GET /speakers?bucket={bucket}</code></td>
+<td>Update table with filtered results</td>
+</tr>
+<tr>
+<td>Click speaker name</td>
+<td><code>GET /speakers/{id}</code></td>
+<td>Navigate to profile page</td>
+</tr>
+<tr>
+<td>Edit speaker</td>
+<td><code>PATCH /speakers/{id}</code></td>
+<td>Update profile display</td>
+</tr>
+<tr>
+<td>Generate DFN</td>
+<td><code>POST /workflow/generate-dfn</code></td>
+<td>Show loading modal, then result</td>
+</tr>
+<tr>
+<td>Approve bucket change</td>
+<td><code>PUT /speakers/{id}/bucket</code></td>
+<td>Update bucket badge, show success</td>
+</tr>
+<tr>
+<td>View draft details</td>
+<td><code>GET /drafts/{id}</code></td>
+<td>Open detail modal/panel</td>
+</tr>
+<tr>
+<td>Ingest drafts</td>
+<td><code>POST /drafts/ingest</code></td>
+<td>Show progress, update count</td>
+</tr>
+</tbody>
+</table>
+<h3 id="73-component-to-data-mapping">7.3 Component-to-Data Mapping</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Data Source</th>
+<th>API Endpoint</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SpeakerCard</strong></td>
+<td>Speaker object</td>
+<td><code>GET /speakers</code></td>
+</tr>
+<tr>
+<td><strong>BucketBadge</strong></td>
+<td>speaker.bucket</td>
+<td>-</td>
+</tr>
+<tr>
+<td><strong>DraftComparison</strong></td>
+<td>draft.original_text, draft.corrected_text</td>
+<td><code>GET /drafts/{id}</code></td>
+</tr>
+<tr>
+<td><strong>MetricsPanel</strong></td>
+<td>evaluation.metrics</td>
+<td><code>GET /evaluations/{id}</code></td>
+</tr>
+<tr>
+<td><strong>DashboardKPIs</strong></td>
+<td>dashboard metrics</td>
+<td><code>GET /dashboard/metrics</code></td>
+</tr>
+<tr>
+<td><strong>SpeakerForm</strong></td>
+<td>Form state</td>
+<td><code>POST /speakers</code> (on submit)</td>
+</tr>
+<tr>
+<td><strong>EvaluationList</strong></td>
+<td>Evaluations array</td>
+<td><code>GET /evaluations</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="8-technical-constraints--requirements">8. Technical Constraints &amp; Requirements</h2>
+<h3 id="81-performance-requirements">8.1 Performance Requirements</h3>
+<h4 id="811-response-time-expectations">8.1.1 Response Time Expectations</h4>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Expected Time</th>
+<th>UI Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>List Speakers</strong></td>
+<td>&lt; 500ms</td>
+<td>Skeleton loader</td>
+</tr>
+<tr>
+<td><strong>Get Speaker Details</strong></td>
+<td>&lt; 300ms</td>
+<td>Skeleton loader</td>
+</tr>
+<tr>
+<td><strong>Create Speaker</strong></td>
+<td>&lt; 1s</td>
+<td>Button loading state</td>
+</tr>
+<tr>
+<td><strong>Generate DFN</strong></td>
+<td>10-30s</td>
+<td>Modal with progress</td>
+</tr>
+<tr>
+<td><strong>List Drafts</strong></td>
+<td>&lt; 1s</td>
+<td>Skeleton loader</td>
+</tr>
+<tr>
+<td><strong>Dashboard Load</strong></td>
+<td>&lt; 2s</td>
+<td>Progressive loading</td>
+</tr>
+</tbody>
+</table>
+<h4 id="812-optimization-strategies">8.1.2 Optimization Strategies</h4>
+<p><strong>Pagination:</strong></p>
+<ul>
+<li>Default: 20 items per page</li>
+<li>Max: 100 items per page</li>
+<li>Use <code>skip</code> and <code>limit</code> parameters</li>
+</ul>
+<p><strong>Caching:</strong></p>
+<ul>
+<li>Cache speaker list for 5 minutes</li>
+<li>Cache dashboard metrics for 2 minutes</li>
+<li>Invalidate cache on create/update/delete</li>
+</ul>
+<p><strong>Lazy Loading:</strong></p>
+<ul>
+<li>Load tabs on demand (not all at once)</li>
+<li>Infinite scroll for long lists (optional)</li>
+<li>Defer loading of charts until visible</li>
+</ul>
+<p><strong>Debouncing:</strong></p>
+<ul>
+<li>Search input: 300ms debounce</li>
+<li>Filter changes: 200ms debounce</li>
+</ul>
+<h3 id="82-browser-compatibility">8.2 Browser Compatibility</h3>
+<p><strong>Supported Browsers:</strong></p>
+<ul>
+<li>Chrome 90+ (recommended)</li>
+<li>Firefox 88+</li>
+<li>Safari 14+</li>
+<li>Edge 90+</li>
+</ul>
+<p><strong>Not Supported:</strong></p>
+<ul>
+<li>Internet Explorer (any version)</li>
+</ul>
+<p><strong>Polyfills Required:</strong></p>
+<ul>
+<li>Fetch API (for older browsers)</li>
+<li>Promise (for older browsers)</li>
+</ul>
+<h3 id="83-security-requirements">8.3 Security Requirements</h3>
+<h4 id="831-token-storage">8.3.1 Token Storage</h4>
+<p><strong>Recommended:</strong></p>
+<ul>
+<li>Use <code>httpOnly</code> cookies for refresh tokens (if backend supports)</li>
+<li>Use <code>localStorage</code> for access tokens (with XSS protection)</li>
+</ul>
+<p><strong>Not Recommended:</strong></p>
+<ul>
+<li>Storing tokens in <code>sessionStorage</code> (lost on tab close)</li>
+<li>Storing tokens in plain cookies (CSRF risk)</li>
+</ul>
+<h4 id="832-input-validation">8.3.2 Input Validation</h4>
+<p><strong>Client-Side:</strong></p>
+<ul>
+<li>Validate all form inputs before submission</li>
+<li>Sanitize user input to prevent XSS</li>
+<li>Use parameterized queries (handled by API client)</li>
+</ul>
+<p><strong>Server-Side:</strong></p>
+<ul>
+<li>Backend validates all inputs (don't rely on client-side only)</li>
+<li>Frontend should match backend validation rules</li>
+</ul>
+<h4 id="833-https-only">8.3.3 HTTPS Only</h4>
+<ul>
+<li>All API calls must use HTTPS</li>
+<li>No mixed content (HTTP resources on HTTPS page)</li>
+<li>Enforce HTTPS in production</li>
+</ul>
+<h3 id="84-error-handling-standards">8.4 Error Handling Standards</h3>
+<h4 id="841-http-status-codes">8.4.1 HTTP Status Codes</h4>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+<th>UI Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>200</strong></td>
+<td>Success</td>
+<td>Show success state</td>
+</tr>
+<tr>
+<td><strong>201</strong></td>
+<td>Created</td>
+<td>Show success toast, redirect</td>
+</tr>
+<tr>
+<td><strong>204</strong></td>
+<td>No Content</td>
+<td>Show success toast</td>
+</tr>
+<tr>
+<td><strong>400</strong></td>
+<td>Bad Request</td>
+<td>Show validation errors inline</td>
+</tr>
+<tr>
+<td><strong>401</strong></td>
+<td>Unauthorized</td>
+<td>Refresh token or redirect to login</td>
+</tr>
+<tr>
+<td><strong>403</strong></td>
+<td>Forbidden</td>
+<td>Show &quot;Access Denied&quot; message</td>
+</tr>
+<tr>
+<td><strong>404</strong></td>
+<td>Not Found</td>
+<td>Show &quot;Not Found&quot; message</td>
+</tr>
+<tr>
+<td><strong>409</strong></td>
+<td>Conflict</td>
+<td>Show conflict message (e.g., duplicate)</td>
+</tr>
+<tr>
+<td><strong>429</strong></td>
+<td>Rate Limit</td>
+<td>Show &quot;Too many requests&quot; message, retry after delay</td>
+</tr>
+<tr>
+<td><strong>500</strong></td>
+<td>Server Error</td>
+<td>Show generic error, offer retry</td>
+</tr>
+<tr>
+<td><strong>503</strong></td>
+<td>Service Unavailable</td>
+<td>Show &quot;Service temporarily unavailable&quot;</td>
+</tr>
+</tbody>
+</table>
+<h4 id="842-error-message-display">8.4.2 Error Message Display</h4>
+<p><strong>Inline Errors (Forms):</strong></p>
+<ul>
+<li>Show below field</li>
+<li>Red text with error icon</li>
+<li>Clear on field change</li>
+</ul>
+<p><strong>Toast Notifications:</strong></p>
+<ul>
+<li>Success: Green, auto-dismiss (3s)</li>
+<li>Error: Red, manual dismiss</li>
+<li>Warning: Orange, auto-dismiss (5s)</li>
+<li>Info: Blue, auto-dismiss (3s)</li>
+</ul>
+<p><strong>Modal Errors:</strong></p>
+<ul>
+<li>For critical errors</li>
+<li>Require user acknowledgment</li>
+<li>Provide retry or cancel options</li>
+</ul>
+<h3 id="85-accessibility-requirements">8.5 Accessibility Requirements</h3>
+<h4 id="851-wcag-21-level-aa-compliance">8.5.1 WCAG 2.1 Level AA Compliance</h4>
+<p><strong>Keyboard Navigation:</strong></p>
+<ul>
+<li>All interactive elements accessible via keyboard</li>
+<li>Logical tab order</li>
+<li>Visible focus indicators</li>
+<li>Escape key closes modals</li>
+</ul>
+<p><strong>Screen Reader Support:</strong></p>
+<ul>
+<li>Semantic HTML (headings, lists, tables)</li>
+<li>ARIA labels for icons and buttons</li>
+<li>ARIA live regions for dynamic content</li>
+<li>Alt text for images</li>
+</ul>
+<p><strong>Color Contrast:</strong></p>
+<ul>
+<li>Text: 4.5:1 minimum</li>
+<li>Large text (18pt+): 3:1 minimum</li>
+<li>UI components: 3:1 minimum</li>
+</ul>
+<p><strong>Responsive Text:</strong></p>
+<ul>
+<li>Support text zoom up to 200%</li>
+<li>No horizontal scrolling at 200% zoom</li>
+</ul>
+<h4 id="852-accessibility-testing">8.5.2 Accessibility Testing</h4>
+<p><strong>Tools:</strong></p>
+<ul>
+<li>axe DevTools (browser extension)</li>
+<li>WAVE (web accessibility evaluation tool)</li>
+<li>Lighthouse (Chrome DevTools)</li>
+</ul>
+<p><strong>Manual Testing:</strong></p>
+<ul>
+<li>Keyboard-only navigation</li>
+<li>Screen reader testing (NVDA, JAWS, VoiceOver)</li>
+<li>Color blindness simulation</li>
+</ul>
+<hr>
+<h2 id="9-accessibility--responsive-design">9. Accessibility &amp; Responsive Design</h2>
+<h3 id="91-responsive-breakpoints">9.1 Responsive Breakpoints</h3>
+<p><strong>Mobile First Approach:</strong></p>
+<pre class="hljs"><code><div><span class="hljs-comment">/* Mobile (default) */</span>
+<span class="hljs-selector-class">.container</span> {
+  <span class="hljs-attribute">padding</span>: <span class="hljs-number">16px</span>;
+}
+
+<span class="hljs-comment">/* Tablet (768px+) */</span>
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">min-width:</span> <span class="hljs-number">768px</span>) {
+  <span class="hljs-selector-class">.container</span> {
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">24px</span>;
+  }
+}
+
+<span class="hljs-comment">/* Desktop (1024px+) */</span>
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">min-width:</span> <span class="hljs-number">1024px</span>) {
+  <span class="hljs-selector-class">.container</span> {
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">32px</span>;
+  }
+}
+
+<span class="hljs-comment">/* Large Desktop (1440px+) */</span>
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">min-width:</span> <span class="hljs-number">1440px</span>) {
+  <span class="hljs-selector-class">.container</span> {
+    <span class="hljs-attribute">padding</span>: <span class="hljs-number">48px</span>;
+  }
+}
+</div></code></pre>
+<h3 id="92-mobile-considerations">9.2 Mobile Considerations</h3>
+<p><strong>Navigation:</strong></p>
+<ul>
+<li>Hamburger menu for mobile</li>
+<li>Bottom navigation for key actions</li>
+<li>Swipe gestures for tabs</li>
+</ul>
+<p><strong>Forms:</strong></p>
+<ul>
+<li>Full-width inputs on mobile</li>
+<li>Large touch targets (44x44px minimum)</li>
+<li>Native input types (email, tel, date)</li>
+</ul>
+<p><strong>Tables:</strong></p>
+<ul>
+<li>Horizontal scroll on mobile</li>
+<li>Or convert to card layout</li>
+<li>Sticky headers</li>
+</ul>
+<p><strong>Modals:</strong></p>
+<ul>
+<li>Full-screen on mobile</li>
+<li>Slide-up animation</li>
+<li>Easy dismiss (swipe down or X button)</li>
+</ul>
+<h3 id="93-touch-interactions">9.3 Touch Interactions</h3>
+<p><strong>Minimum Touch Target Size:</strong></p>
+<ul>
+<li>44x44px (iOS guideline)</li>
+<li>48x48px (Android guideline)</li>
+<li>Use 48x48px for consistency</li>
+</ul>
+<p><strong>Gestures:</strong></p>
+<ul>
+<li>Swipe to delete (lists)</li>
+<li>Pull to refresh (lists)</li>
+<li>Pinch to zoom (images, charts)</li>
+<li>Long press for context menu</li>
+</ul>
+<hr>
+<h2 id="10-appendices">10. Appendices</h2>
+<h3 id="101-glossary">10.1 Glossary</h3>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AD</strong></td>
+<td>ASR Draft - Raw automatic speech recognition output</td>
+</tr>
+<tr>
+<td><strong>BSA</strong></td>
+<td>Batch Speaker Addition - Bulk onboarding of multiple speakers</td>
+</tr>
+<tr>
+<td><strong>DFN</strong></td>
+<td>DraftGenie Final Note - AI-improved final note</td>
+</tr>
+<tr>
+<td><strong>IFN</strong></td>
+<td>InstaNote Final Note - Human-edited final note from InstaNote</td>
+</tr>
+<tr>
+<td><strong>LD</strong></td>
+<td>LLM Draft - LLM-generated draft from InstaNote</td>
+</tr>
+<tr>
+<td><strong>RAG</strong></td>
+<td>Retrieval-Augmented Generation - AI technique combining retrieval and generation</td>
+</tr>
+<tr>
+<td><strong>SER</strong></td>
+<td>Sentence Edit Rate - Metric for sentence-level changes</td>
+</tr>
+<tr>
+<td><strong>SSA</strong></td>
+<td>Single Speaker Addition - Manual onboarding of one speaker</td>
+</tr>
+<tr>
+<td><strong>WER</strong></td>
+<td>Word Error Rate - Metric for word-level accuracy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="102-bucket-definitions">10.2 Bucket Definitions</h3>
+<table>
+<thead>
+<tr>
+<th>Bucket</th>
+<th>Quality Range</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>EXCELLENT</strong></td>
+<td>95-100%</td>
+<td>Minimal corrections needed, high accuracy</td>
+</tr>
+<tr>
+<td><strong>GOOD</strong></td>
+<td>85-94%</td>
+<td>Few corrections needed, good accuracy</td>
+</tr>
+<tr>
+<td><strong>AVERAGE</strong></td>
+<td>70-84%</td>
+<td>Moderate corrections needed, acceptable accuracy</td>
+</tr>
+<tr>
+<td><strong>POOR</strong></td>
+<td>50-69%</td>
+<td>Many corrections needed, below average accuracy</td>
+</tr>
+<tr>
+<td><strong>NEEDS_IMPROVEMENT</strong></td>
+<td>0-49%</td>
+<td>Extensive corrections needed, low accuracy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="103-api-resources">10.3 API Resources</h3>
+<p><strong>Production API:</strong></p>
+<ul>
+<li>Base URL: <code>https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1</code></li>
+<li>Swagger UI: <code>https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/docs</code></li>
+<li>Health Check: <code>https://api-gateway.gentleforest-322351b3.southindia.azurecontainerapps.io/api/v1/health</code></li>
+</ul>
+<p><strong>Documentation:</strong></p>
+<ul>
+<li>Complete API Docs: <code>docs/FRONTEND_API_DOCUMENTATION.md</code></li>
+<li>Quick Reference: <code>docs/API_QUICK_REFERENCE.md</code></li>
+<li>Postman Collection: <code>docs/DraftGenie_API.postman_collection.json</code></li>
+</ul>
+<h3 id="104-design-assets">10.4 Design Assets</h3>
+<p><strong>Recommended Tools:</strong></p>
+<ul>
+<li>Figma (design mockups)</li>
+<li>Storybook (component library)</li>
+<li>Chromatic (visual testing)</li>
+</ul>
+<p><strong>Icon Library:</strong></p>
+<ul>
+<li>Material Icons (recommended)</li>
+<li>Font Awesome (alternative)</li>
+<li>Heroicons (alternative)</li>
+</ul>
+<p><strong>Chart Library:</strong></p>
+<ul>
+<li>Chart.js (recommended)</li>
+<li>Recharts (React)</li>
+<li>ApexCharts (alternative)</li>
+</ul>
+<h3 id="105-sample-workflows">10.5 Sample Workflows</h3>
+<h4 id="workflow-1-complete-speaker-onboarding">Workflow 1: Complete Speaker Onboarding</h4>
+<pre class="hljs"><code><div>1. Admin clicks &quot;Add Speaker&quot;
+2. Fills form: Name, Email, Bucket, External ID
+3. Clicks &quot;Create Speaker&quot;
+4. API: POST /speakers → 201 Created
+5. Success toast appears
+6. Redirect to speaker profile
+7. Background: POST /drafts/ingest (automatic)
+8. Drafts tab shows &quot;Ingesting...&quot; status
+9. After 10-30s, drafts appear
+10. Admin can now generate DFN
+</div></code></pre>
+<h4 id="workflow-2-generate-and-evaluate-dfn">Workflow 2: Generate and Evaluate DFN</h4>
+<pre class="hljs"><code><div>1. Admin navigates to speaker profile
+2. Clicks &quot;Generate DFN&quot; button
+3. Modal appears with prompt field
+4. Admin enters prompt (optional)
+5. Clicks &quot;Generate&quot;
+6. API: POST /workflow/generate-dfn
+7. Loading modal shows progress (10-30s)
+8. DFN appears with quality metrics
+9. Admin reviews and clicks &quot;Accept&quot;
+10. DFN saved to database
+11. Evaluation triggered automatically
+12. Evaluation appears in Evaluations tab
+13. Admin reviews metrics
+14. Approves bucket change if recommended
+15. API: PUT /speakers/{id}/bucket
+16. Bucket badge updates
+</div></code></pre>
+<h3 id="106-testing-checklist">10.6 Testing Checklist</h3>
+<p><strong>Functional Testing:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox0"><label for="checkbox0">Login/logout works</label></li>
+<li><input type="checkbox" id="checkbox1"><label for="checkbox1">Create speaker (SSA)</label></li>
+<li><input type="checkbox" id="checkbox2"><label for="checkbox2">Bulk import (BSA)</label></li>
+<li><input type="checkbox" id="checkbox3"><label for="checkbox3">View speaker list with filters</label></li>
+<li><input type="checkbox" id="checkbox4"><label for="checkbox4">View speaker profile</label></li>
+<li><input type="checkbox" id="checkbox5"><label for="checkbox5">Edit speaker details</label></li>
+<li><input type="checkbox" id="checkbox6"><label for="checkbox6">Generate DFN</label></li>
+<li><input type="checkbox" id="checkbox7"><label for="checkbox7">View drafts</label></li>
+<li><input type="checkbox" id="checkbox8"><label for="checkbox8">View evaluations</label></li>
+<li><input type="checkbox" id="checkbox9"><label for="checkbox9">Approve bucket change</label></li>
+<li><input type="checkbox" id="checkbox10"><label for="checkbox10">Dashboard loads with metrics</label></li>
+</ul>
+<p><strong>UI/UX Testing:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox11"><label for="checkbox11">All buttons have hover states</label></li>
+<li><input type="checkbox" id="checkbox12"><label for="checkbox12">Loading states appear for async operations</label></li>
+<li><input type="checkbox" id="checkbox13"><label for="checkbox13">Error messages are clear and actionable</label></li>
+<li><input type="checkbox" id="checkbox14"><label for="checkbox14">Success messages appear and auto-dismiss</label></li>
+<li><input type="checkbox" id="checkbox15"><label for="checkbox15">Forms validate in real-time</label></li>
+<li><input type="checkbox" id="checkbox16"><label for="checkbox16">Pagination works correctly</label></li>
+<li><input type="checkbox" id="checkbox17"><label for="checkbox17">Filters apply correctly</label></li>
+<li><input type="checkbox" id="checkbox18"><label for="checkbox18">Search works as expected</label></li>
+</ul>
+<p><strong>Responsive Testing:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox19"><label for="checkbox19">Mobile (320px-767px)</label></li>
+<li><input type="checkbox" id="checkbox20"><label for="checkbox20">Tablet (768px-1023px)</label></li>
+<li><input type="checkbox" id="checkbox21"><label for="checkbox21">Desktop (1024px+)</label></li>
+<li><input type="checkbox" id="checkbox22"><label for="checkbox22">Touch interactions work on mobile</label></li>
+<li><input type="checkbox" id="checkbox23"><label for="checkbox23">Navigation adapts to screen size</label></li>
+</ul>
+<p><strong>Accessibility Testing:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox24"><label for="checkbox24">Keyboard navigation works</label></li>
+<li><input type="checkbox" id="checkbox25"><label for="checkbox25">Screen reader announces content</label></li>
+<li><input type="checkbox" id="checkbox26"><label for="checkbox26">Color contrast meets WCAG AA</label></li>
+<li><input type="checkbox" id="checkbox27"><label for="checkbox27">Focus indicators visible</label></li>
+<li><input type="checkbox" id="checkbox28"><label for="checkbox28">ARIA labels present</label></li>
+</ul>
+<p><strong>Performance Testing:</strong></p>
+<ul>
+<li><input type="checkbox" id="checkbox29"><label for="checkbox29">Page load &lt; 3s</label></li>
+<li><input type="checkbox" id="checkbox30"><label for="checkbox30">API calls &lt; 2s (except DFN generation)</label></li>
+<li><input type="checkbox" id="checkbox31"><label for="checkbox31">No memory leaks</label></li>
+<li><input type="checkbox" id="checkbox32"><label for="checkbox32">Smooth animations (60fps)</label></li>
+</ul>
+<h3 id="107-support--resources">10.7 Support &amp; Resources</h3>
+<p><strong>For Questions:</strong></p>
+<ol>
+<li>Check Swagger UI: <code>/api/docs</code></li>
+<li>Review API documentation: <code>docs/FRONTEND_API_DOCUMENTATION.md</code></li>
+<li>Test with Postman collection</li>
+<li>Contact backend team</li>
+</ol>
+<p><strong>Useful Links:</strong></p>
+<ul>
+<li>System Architecture: <code>docs/system_architecture_and_implementation_plan.md</code></li>
+<li>Frontend Handoff: <code>docs/FRONTEND_TEAM_HANDOFF.md</code></li>
+<li>Deployment Guide: <code>docs/deployment/azure-deployment-guide.md</code></li>
+</ul>
+<hr>
+<p><strong>Document Version:</strong> 1.0
+<strong>Last Updated:</strong> 2025-10-16
+<strong>Status:</strong> ✅ Complete
+<strong>Next Review:</strong> 2025-11-16</p>
+<p><strong>Prepared by:</strong> DraftGenie Backend Team
+<strong>For:</strong> Frontend Development Team</p>
+
+</body>
+</html>

@@ -3,7 +3,6 @@ RAG Session Service - Manage RAG sessions
 """
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.models.rag_session import (
     RAGSessionModel,
@@ -11,6 +10,7 @@ from app.models.rag_session import (
     RAGSessionUpdate,
     RAGSessionResponse,
 )
+from app.repositories.rag_session_repository_sql import RAGSessionRepositorySQL
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -19,51 +19,24 @@ logger = get_logger(__name__)
 class RAGSessionService:
     """Service for managing RAG sessions"""
 
-    def __init__(self, db: AsyncIOMotorDatabase):
-        self.db = db
-        self.collection = db.rag_sessions
+    def __init__(self, repository: RAGSessionRepositorySQL):
+        self.repository = repository
 
     async def create_session(
         self, session_create: RAGSessionCreate
     ) -> RAGSessionModel:
         """
         Create a new RAG session
-        
+
         Args:
             session_create: Session creation data
-            
+
         Returns:
             Created session model
         """
         try:
             logger.info(f"Creating RAG session {session_create.session_id}")
-
-            # Check if session already exists
-            existing = await self.collection.find_one(
-                {"session_id": session_create.session_id}
-            )
-            if existing:
-                raise ValueError(f"Session {session_create.session_id} already exists")
-
-            # Create session document
-            session_dict = session_create.model_dump()
-            session_dict["prompts_used"] = []
-            session_dict["agent_steps"] = []
-            session_dict["dfn_generated"] = False
-            session_dict["dfn_id"] = None
-            session_dict["status"] = "pending"
-            session_dict["error_message"] = None
-            session_dict["created_at"] = datetime.utcnow()
-            session_dict["updated_at"] = datetime.utcnow()
-
-            # Insert into database
-            result = await self.collection.insert_one(session_dict)
-            session_dict["_id"] = result.inserted_id
-
-            session_model = RAGSessionModel(**session_dict)
-            logger.info(f"Created RAG session {session_create.session_id}")
-            return session_model
-
+            return await self.repository.create(session_create)
         except Exception as e:
             logger.error(f"Error creating session: {e}")
             raise
@@ -71,10 +44,7 @@ class RAGSessionService:
     async def get_session_by_id(self, session_id: str) -> Optional[RAGSessionModel]:
         """Get session by ID"""
         try:
-            session = await self.collection.find_one({"session_id": session_id})
-            if session:
-                return RAGSessionModel(**session)
-            return None
+            return await self.repository.find_by_id(session_id)
         except Exception as e:
             logger.error(f"Error getting session {session_id}: {e}")
             return None
@@ -84,19 +54,7 @@ class RAGSessionService:
     ) -> List[RAGSessionModel]:
         """Get all sessions for a speaker"""
         try:
-            cursor = (
-                self.collection.find({"speaker_id": speaker_id})
-                .sort("created_at", -1)
-                .skip(skip)
-                .limit(limit)
-            )
-
-            sessions = []
-            async for session in cursor:
-                sessions.append(RAGSessionModel(**session))
-
-            return sessions
-
+            return await self.repository.find_by_speaker(speaker_id, skip, limit)
         except Exception as e:
             logger.error(f"Error getting sessions for speaker {speaker_id}: {e}")
             return []
@@ -107,26 +65,7 @@ class RAGSessionService:
         """Update a session"""
         try:
             logger.info(f"Updating session {session_id}")
-
-            # Get update data
-            update_data = session_update.model_dump(exclude_unset=True)
-            if not update_data:
-                return await self.get_session_by_id(session_id)
-
-            update_data["updated_at"] = datetime.utcnow()
-
-            # Update in database
-            result = await self.collection.update_one(
-                {"session_id": session_id},
-                {"$set": update_data},
-            )
-
-            if result.modified_count == 0:
-                logger.warning(f"Session {session_id} not found or not modified")
-                return None
-
-            return await self.get_session_by_id(session_id)
-
+            return await self.repository.update(session_id, session_update)
         except Exception as e:
             logger.error(f"Error updating session {session_id}: {e}")
             raise
@@ -137,25 +76,7 @@ class RAGSessionService:
         """Add an agent step to session"""
         try:
             logger.info(f"Adding agent step to session {session_id}")
-
-            # Add timestamp to step
-            step["timestamp"] = datetime.utcnow().isoformat()
-
-            # Update in database
-            result = await self.collection.update_one(
-                {"session_id": session_id},
-                {
-                    "$push": {"agent_steps": step},
-                    "$set": {"updated_at": datetime.utcnow()},
-                },
-            )
-
-            if result.modified_count == 0:
-                logger.warning(f"Session {session_id} not found")
-                return None
-
-            return await self.get_session_by_id(session_id)
-
+            return await self.repository.add_agent_step(session_id, step)
         except Exception as e:
             logger.error(f"Error adding agent step: {e}")
             raise
@@ -166,24 +87,7 @@ class RAGSessionService:
         """Mark session as complete"""
         try:
             logger.info(f"Marking session {session_id} as complete")
-
-            result = await self.collection.update_one(
-                {"session_id": session_id},
-                {
-                    "$set": {
-                        "dfn_generated": True,
-                        "dfn_id": dfn_id,
-                        "status": "complete",
-                        "updated_at": datetime.utcnow(),
-                    }
-                },
-            )
-
-            if result.modified_count == 0:
-                logger.warning(f"Session {session_id} not found")
-                return None
-
-            return await self.get_session_by_id(session_id)
+            return await self.repository.mark_complete(session_id, dfn_id)
 
         except Exception as e:
             logger.error(f"Error marking session complete: {e}")
@@ -195,30 +99,17 @@ class RAGSessionService:
         """Mark session as failed"""
         try:
             logger.info(f"Marking session {session_id} as failed")
-
-            result = await self.collection.update_one(
-                {"session_id": session_id},
-                {
-                    "$set": {
-                        "status": "failed",
-                        "error_message": error_message,
-                        "updated_at": datetime.utcnow(),
-                    }
-                },
-            )
-
-            if result.modified_count == 0:
-                logger.warning(f"Session {session_id} not found")
-                return None
-
-            return await self.get_session_by_id(session_id)
-
+            return await self.repository.mark_failed(session_id, error_message)
         except Exception as e:
             logger.error(f"Error marking session failed: {e}")
             raise
 
 
-def get_rag_session_service(db: AsyncIOMotorDatabase) -> RAGSessionService:
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+def get_rag_session_service(session: AsyncSession) -> RAGSessionService:
     """Factory function to create RAGSessionService"""
-    return RAGSessionService(db)
+    repository = RAGSessionRepositorySQL(session)
+    return RAGSessionService(repository)
 
