@@ -6,17 +6,26 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import { getServicePort } from '@draft-genie/common';
+import {
+  getServicePort,
+  GlobalExceptionFilter,
+  LoggingInterceptor,
+} from '@draft-genie/common';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  
+
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
   // Global prefix
   app.setGlobalPrefix('api/v1');
+
+  // Enhanced error logging and tracking
+  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor(true, false, 10000));
+  logger.log('✅ Enhanced logging and error tracking enabled');
 
   // Validation pipe
   app.useGlobalPipes(

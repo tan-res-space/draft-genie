@@ -7,4 +7,6 @@ export * from './constants';
 export * from './types';
 export * from './events';
 export * from './config/ports.config';
+export * from './filters/global-exception.filter';
+export * from './interceptors/logging.interceptor';
 

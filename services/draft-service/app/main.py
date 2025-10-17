@@ -3,9 +3,10 @@ Draft Service - Main FastAPI application
 """
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
 
 from app.core.config import settings
 from app.core.logging import setup_logging, get_logger
@@ -17,6 +18,16 @@ from app.events.handlers import EventHandler
 from app.services.draft_service import get_draft_service
 from app.repositories.draft_repository_sql import DraftRepositorySQL
 from app.api import health_router, drafts_router, vectors_router
+
+# Try to import enhanced logging middleware
+try:
+    from libs.python.common.logging_middleware import (
+        RequestLoggingMiddleware,
+        ErrorTrackingMiddleware,
+    )
+    ENHANCED_MIDDLEWARE_AVAILABLE = True
+except ImportError:
+    ENHANCED_MIDDLEWARE_AVAILABLE = False
 
 # Setup logging
 setup_logging()
@@ -101,6 +112,17 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# Add enhanced logging middleware if available
+if ENHANCED_MIDDLEWARE_AVAILABLE:
+    app.add_middleware(ErrorTrackingMiddleware)
+    app.add_middleware(
+        RequestLoggingMiddleware,
+        log_request_body=True,
+        log_response_body=False,
+        max_body_size=10000,
+    )
+    logger.info("Enhanced logging middleware enabled")
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -112,10 +134,43 @@ app.add_middleware(
 
 
 # Exception handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions"""
+    logger.warning(
+        f"HTTP exception: {exc.status_code} - {exc.detail}",
+        extra={
+            "extra_data": {
+                "status_code": exc.status_code,
+                "detail": exc.detail,
+                "path": request.url.path,
+                "method": request.method,
+            }
+        }
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error": exc.detail,
+            "status_code": exc.status_code,
+        },
+    )
+
+
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    """Global exception handler"""
-    logger.error(f"Unhandled exception: {exc}", exc_info=True)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler for unhandled exceptions"""
+    logger.error(
+        f"Unhandled exception: {type(exc).__name__}: {str(exc)}",
+        exc_info=True,
+        extra={
+            "extra_data": {
+                "error_type": type(exc).__name__,
+                "path": request.url.path,
+                "method": request.method,
+            }
+        }
+    )
     return JSONResponse(
         status_code=500,
         content={

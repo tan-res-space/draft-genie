@@ -418,6 +418,21 @@ class DraftGenieDeployer:
         """Deploy application services."""
         print_step(11, 15, "Deploying Application Services")
 
+        # Initialize Container Apps deployer if not already initialized
+        # (can happen if deploy_infrastructure_services step was skipped)
+        if not hasattr(self, 'container_apps_deployer') or self.container_apps_deployer is None:
+            registry_info = self.state['created_resources']['container_registry']
+            env_name = self.state['created_resources']['container_apps_env']['name']
+
+            self.container_apps_deployer = ContainerAppsDeployer(
+                self.config,
+                self.config['azure']['resource_group'],
+                env_name,
+                registry_info,
+                self.logger,
+                self.dry_run
+            )
+
         # Get environment variables from state
         env_vars = self._build_environment_variables()
 

@@ -183,7 +183,10 @@ def main():
         # Push image
         if not args.skip_push:
             print_header("Pushing Docker Image")
-            success, message = builder.push_image(args.service, args.tag)
+            # Get the full image name if we skipped the build
+            if args.skip_build:
+                image_name = builder.get_image_name(args.service, args.tag)
+            success, message = builder.push_image(image_name)
             if not success:
                 print_error(f"Failed to push image: {message}")
                 sys.exit(1)

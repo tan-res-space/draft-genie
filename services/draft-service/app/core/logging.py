@@ -1,5 +1,7 @@
 """
 Logging configuration for the Draft Service
+
+This module provides enhanced logging with comprehensive error tracking.
 """
 import logging
 import sys
@@ -8,6 +10,17 @@ import json
 from datetime import datetime
 
 from app.core.config import settings
+
+# Try to import enhanced logging, fall back to basic if not available
+try:
+    from libs.python.common.enhanced_logging import (
+        setup_enhanced_logging,
+        get_enhanced_logger,
+        EnhancedJSONFormatter,
+    )
+    ENHANCED_LOGGING_AVAILABLE = True
+except ImportError:
+    ENHANCED_LOGGING_AVAILABLE = False
 
 
 class JSONFormatter(logging.Formatter):
@@ -36,7 +49,19 @@ class JSONFormatter(logging.Formatter):
 
 
 def setup_logging() -> None:
-    """Setup application logging"""
+    """Setup application logging with enhanced error tracking"""
+    # Use enhanced logging if available
+    if ENHANCED_LOGGING_AVAILABLE:
+        setup_enhanced_logging(
+            service_name=settings.app_name,
+            environment=settings.environment,
+            log_level=settings.log_level,
+            include_locals=False,  # Set to True for debugging, but be cautious with sensitive data
+            json_logs=(settings.log_format.lower() == "json"),
+        )
+        return
+
+    # Fallback to basic logging
     # Get log level from settings
     log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
 
@@ -74,5 +99,7 @@ def setup_logging() -> None:
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance"""
+    if ENHANCED_LOGGING_AVAILABLE:
+        return get_enhanced_logger(name)
     return logging.getLogger(name)
 

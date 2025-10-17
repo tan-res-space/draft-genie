@@ -1,5 +1,5 @@
 """
-Logging configuration
+Logging configuration with enhanced error tracking
 """
 import logging
 import sys
@@ -8,6 +8,16 @@ from datetime import datetime
 from typing import Any, Dict
 
 from app.core.config import settings
+
+# Try to import enhanced logging
+try:
+    from libs.python.common.enhanced_logging import (
+        setup_enhanced_logging,
+        get_enhanced_logger,
+    )
+    ENHANCED_LOGGING_AVAILABLE = True
+except ImportError:
+    ENHANCED_LOGGING_AVAILABLE = False
 
 
 class JSONFormatter(logging.Formatter):
@@ -33,7 +43,19 @@ class JSONFormatter(logging.Formatter):
 
 
 def setup_logging() -> None:
-    """Setup logging configuration"""
+    """Setup logging configuration with enhanced error tracking"""
+    # Use enhanced logging if available
+    if ENHANCED_LOGGING_AVAILABLE:
+        setup_enhanced_logging(
+            service_name=settings.app_name,
+            environment=settings.environment,
+            log_level=settings.log_level,
+            include_locals=False,
+            json_logs=settings.is_production,
+        )
+        return
+
+    # Fallback to basic logging
     # Create handler
     handler = logging.StreamHandler(sys.stdout)
 
@@ -61,5 +83,7 @@ def setup_logging() -> None:
 
 def get_logger(name: str) -> logging.Logger:
     """Get logger instance"""
+    if ENHANCED_LOGGING_AVAILABLE:
+        return get_enhanced_logger(name)
     return logging.getLogger(name)
 
